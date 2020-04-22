@@ -12,11 +12,12 @@ import com.sk89q.worldedit.function.operation.Operation
 import com.sk89q.worldedit.function.operation.Operations
 import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.session.ClipboardHolder
+import com.sk89q.worldedit.world.block.BlockTypes
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
 import org.bukkit.*
+import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
-
 
 class WorldManager(private val plugin: Gamesys) {
     private val worldName = "world_arenas"
@@ -30,9 +31,10 @@ class WorldManager(private val plugin: Gamesys) {
     fun insertArena(game: Game) {
         TaskManager.IMP.async {
             try {
-                val pasteTo = BlockVector3.at(latestPasteX + (biggestArenaSize/2) + arenaBorder, pasteHeight, 0)
+                plugin.logger.logInfo("Pasting arena ${game.arena.name}")
 
                 val now = System.currentTimeMillis()
+                val pasteTo = BlockVector3.at(latestPasteX + (biggestArenaSize/2) + arenaBorder, pasteHeight, 0)
                 val clipboard = ClipboardFormats.findByFile(game.arena.file)?.getReader(game.arena.file.inputStream())?.read()
                 val clipboardHolder = ClipboardHolder(clipboard)
                 val editSession = EditSessionBuilder(BukkitWorld(bukkitWorld)).fastmode(true).build()
@@ -41,9 +43,14 @@ class WorldManager(private val plugin: Gamesys) {
                     .to(pasteTo)
                     .ignoreAirBlocks(true)
                     .build()
+
                 Operations.complete(operation)
 
                 game.onArenaLoaded(editSession, Location(bukkitWorld, pasteTo.x.toDouble(), pasteTo.y.toDouble(), pasteTo.z.toDouble()))
+
+                game.getSpawnLocations().forEach {
+                    editSession.setBlock(BlockVector3.at(it.blockX, it.blockY, it.blockZ), BlockTypes.AIR?.defaultState)
+                }
 
                 editSession.close()
 
@@ -56,54 +63,77 @@ class WorldManager(private val plugin: Gamesys) {
     }
 
     fun loadWorld(): World {
+        plugin.logger.logInfo("Loading world")
+
         deleteWorld()
 
+        val now = System.currentTimeMillis()
+        var world: World? = plugin.server.getWorld(worldName)
         val mV: MultiverseCore = plugin.server.pluginManager.getPlugin("Multiverse-Core") as MultiverseCore
-        if (mV.mvWorldManager.loadWorld(worldName)) {
-            return mV.mvWorldManager.getMVWorld(worldName).cbWorld
-        }
 
-        val ret: Boolean = mV.mvWorldManager.addWorld(worldName, World.Environment.NORMAL, null, WorldType.NORMAL, false, "VoidGenerator", false)
+        val region = File("./${worldName}/region")
+        val backupRegion = File("./${worldName}/region_backup")
 
-        var world: World? = null
+        if (world != null) {
+            plugin.server.unloadWorld(world, true)
+            mV.mvWorldManager.unloadWorld(worldName)
+            region.deleteRecursively()
+            if (backupRegion.exists()) {
+                backupRegion.copyRecursively(region)
+            }
+            mV.mvWorldManager.loadWorld(worldName)
 
-        if (ret) {
-            val mvWorld: MultiverseWorld = mV.mvWorldManager.getMVWorld(worldName)
-            world = mvWorld.cbWorld
-            mvWorld.setPVPMode(true)
-            mvWorld.setEnableWeather(false)
-            mvWorld.setKeepSpawnInMemory(false)
-            mvWorld.setAllowAnimalSpawn(false)
-            mvWorld.setAllowMonsterSpawn(false)
-            mvWorld.gameMode = GameMode.ADVENTURE
-        }
+        } else {
+            val ret: Boolean = mV.mvWorldManager.addWorld(worldName, World.Environment.NORMAL, null, WorldType.NORMAL, false, "VoidGenerator", false)
 
-        if (world == null) {
-            val worldCreator = WorldCreator(worldName)
-            worldCreator.environment(World.Environment.NORMAL)
-            worldCreator.generateStructures(false)
-            worldCreator.generator("SkyClean")
-            world = worldCreator.createWorld()
+            if (ret) {
+                val mvWorld: MultiverseWorld = mV.mvWorldManager.getMVWorld(worldName)
+                world = mvWorld.cbWorld
+                mvWorld.setPVPMode(true)
+                mvWorld.setEnableWeather(false)
+                mvWorld.setKeepSpawnInMemory(false)
+                mvWorld.setAllowAnimalSpawn(false)
+                mvWorld.setAllowMonsterSpawn(false)
+                mvWorld.gameMode = GameMode.ADVENTURE
+            }
+
+            if (world == null) {
+                val worldCreator = WorldCreator(worldName)
+                worldCreator.environment(World.Environment.NORMAL)
+                worldCreator.generateStructures(false)
+                worldCreator.generator("VoidGenerator")
+                world = worldCreator.createWorld()
+                if (world != null) {
+                    world.difficulty = Difficulty.NORMAL
+                    world.setSpawnFlags(false, false)
+                    world.pvp = true
+                    world.setStorm(false)
+                    world.isThundering = false
+                    world.weatherDuration = Int.MAX_VALUE
+                    world.keepSpawnInMemory = false
+                    world.setTicksPerAnimalSpawns(0)
+                    world.setTicksPerMonsterSpawns(0)
+                }
+            }
+
             if (world != null) {
-                world.difficulty = Difficulty.NORMAL
-                world.setSpawnFlags(false, false)
-                world.pvp = true
-                world.setStorm(false)
-                world.isThundering = false
-                world.weatherDuration = Int.MAX_VALUE
-                world.keepSpawnInMemory = false
-                world.setTicksPerAnimalSpawns(0)
-                world.setTicksPerMonsterSpawns(0)
+                world.isAutoSave = false
+                world.time = 6000
+                world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
+                world.setGameRule(GameRule.DO_FIRE_TICK, false)
+                world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
             }
         }
 
-        if (world != null) {
-            world.isAutoSave = false
-            world.time = 6000
-            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
-            world.setGameRule(GameRule.DO_FIRE_TICK, false)
-            world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
-        }
+        object : BukkitRunnable() {
+            override fun run() {
+                if (!backupRegion.exists()) {
+                    region.copyRecursively(backupRegion)
+                }
+            }
+        }.runTaskLaterAsynchronously(plugin, 60)
+
+        plugin.logger.logInfo("World $worldName loaded (${(System.currentTimeMillis() - now)}ms)")
 
         worldEditWorld = FaweAPI.getWorld(worldName)
         bukkitWorld = world!!
