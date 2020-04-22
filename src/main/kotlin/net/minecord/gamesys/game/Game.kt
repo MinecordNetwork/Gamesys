@@ -1,5 +1,6 @@
 package net.minecord.gamesys.game
 
+import com.sk89q.worldedit.EditSession
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.player.GamePlayer
@@ -12,24 +13,17 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     val locations = hashMapOf<String, MutableList<Location>>()
     val players = mutableListOf<GamePlayer>()
 
-    fun onArenaLoaded(center: Location) {
+    fun onArenaLoaded(editSession: EditSession, origin: Location) {
         for ((string, vectors) in arena.locations) {
             locations[string] = mutableListOf()
             vectors.forEach {
-                plugin.logger.logDebug(string)
-                plugin.logger.logDebug("Center: ${center.toVector().x} ${center.toVector().y} ${center.toVector().z}")
-                plugin.logger.logDebug("Vector: ${it.x} ${it.y} ${it.z}")
+                it.add(origin.toVector())
 
-                it.add(center.toVector())
-
-                plugin.logger.logDebug("Sum: ${it.x} ${it.y} ${it.z}")
-                plugin.logger.logDebug("---")
-
-                val location = Location(center.world, it.x, it.y, it.z).add(0.5, 0.toDouble(), 0.5)
+                val location = Location(origin.world, it.x, it.y, it.z).add(0.5, 0.toDouble(), 0.5)
 
                 location.yaw = (atan21(
-                    y = -(center.x - location.x),
-                    x = center.z - location.z
+                    y = -(origin.x - location.x),
+                    x = origin.z - location.z
                 ) * (180.0 / Math.PI)).toFloat()
                 location.pitch = 0f
 

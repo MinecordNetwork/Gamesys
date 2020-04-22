@@ -42,10 +42,12 @@ class WorldManager(private val plugin: Gamesys) {
                     .ignoreAirBlocks(true)
                     .build()
                 Operations.complete(operation)
-                editSession.close()
-                Bukkit.broadcastMessage("Arena ${game.arena.name} pasted (" + (System.currentTimeMillis() - now) + "ms).")
 
-                game.onArenaLoaded(Location(bukkitWorld, pasteTo.x.toDouble(), pasteTo.y.toDouble(), pasteTo.z.toDouble()))
+                game.onArenaLoaded(editSession, Location(bukkitWorld, pasteTo.x.toDouble(), pasteTo.y.toDouble(), pasteTo.z.toDouble()))
+
+                editSession.close()
+
+                plugin.logger.logInfo("Arena ${game.arena.name} pasted (${(System.currentTimeMillis() - now)}ms)")
 
             } catch (e: Exception) {
                 Bukkit.broadcastMessage("Unable to paste arena.")
