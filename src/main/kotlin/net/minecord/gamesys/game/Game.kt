@@ -17,11 +17,12 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             locations[string] = mutableListOf()
             vectors.forEach {
                 plugin.logger.logDebug(string)
-                plugin.logger.logDebug("Before: ${it.x} ${it.y} ${it.z}")
+                plugin.logger.logDebug("Center: ${center.toVector().x} ${center.toVector().y} ${center.toVector().z}")
+                plugin.logger.logDebug("Vector: ${it.x} ${it.y} ${it.z}")
 
                 it.add(center.toVector())
 
-                plugin.logger.logDebug("After: ${it.x} ${it.y} ${it.z}")
+                plugin.logger.logDebug("Sum: ${it.x} ${it.y} ${it.z}")
                 plugin.logger.logDebug("---")
 
                 val location = Location(center.world, it.x, it.y, it.z).add(0.5, 0.toDouble(), 0.5)
