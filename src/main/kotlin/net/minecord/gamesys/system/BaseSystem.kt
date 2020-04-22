@@ -1,8 +1,11 @@
 package net.minecord.gamesys.system
 
+import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.Game
 import net.minecord.gamesys.game.player.GamePlayer
+import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -13,8 +16,8 @@ open class BaseSystem : System {
         return Arena(name, file, locations, minPlayers, maxPlayers)
     }
 
-    override fun createGame(arena: Arena): Game {
-        return Game(arena)
+    override fun createGame(plugin: Gamesys, arena: Arena): Game {
+        return Game(plugin, arena)
     }
 
     override fun createGamePlayer(player: Player): GamePlayer {
@@ -28,5 +31,9 @@ open class BaseSystem : System {
         map["chests"] = Material.CHEST
 
         return map
+    }
+
+    override fun getSpawnLocation(): Location {
+        return Location(Bukkit.getWorld("EventWorld"), 683.toDouble(), 186.toDouble(), 131.toDouble())
     }
 }

@@ -18,7 +18,7 @@ import org.bukkit.*
 import java.io.File
 
 
-class WorldManager(private val api: Gamesys) {
+class WorldManager(private val plugin: Gamesys) {
     private val worldName = "world_arenas"
     private lateinit var bukkitWorld: World
     private lateinit var worldEditWorld: com.sk89q.worldedit.world.World
@@ -45,7 +45,7 @@ class WorldManager(private val api: Gamesys) {
                 editSession.close()
                 Bukkit.broadcastMessage("Arena ${game.arena.name} pasted (" + (System.currentTimeMillis() - now) + "ms).")
 
-                game.onArenaLoaded(Location(bukkitWorld, pasteTo.x + 0.5, pasteTo.y.toDouble(), pasteTo.z + 0.5))
+                game.onArenaLoaded(Location(bukkitWorld, pasteTo.x.toDouble(), pasteTo.y.toDouble(), pasteTo.z.toDouble()))
 
             } catch (e: Exception) {
                 Bukkit.broadcastMessage("Unable to paste arena.")
@@ -56,7 +56,7 @@ class WorldManager(private val api: Gamesys) {
     fun loadWorld(): World {
         deleteWorld()
 
-        val mV: MultiverseCore = api.server.pluginManager.getPlugin("Multiverse-Core") as MultiverseCore
+        val mV: MultiverseCore = plugin.server.pluginManager.getPlugin("Multiverse-Core") as MultiverseCore
         if (mV.mvWorldManager.loadWorld(worldName)) {
             return mV.mvWorldManager.getMVWorld(worldName).cbWorld
         }
@@ -110,7 +110,7 @@ class WorldManager(private val api: Gamesys) {
     }
 
     private fun deleteWorld() {
-        val world: World? = api.server.getWorld(worldName)
+        val world: World? = plugin.server.getWorld(worldName)
 
         var result = false
         if (Bukkit.getPluginManager().getPlugin("Multiverse-Core") != null) {
@@ -128,13 +128,13 @@ class WorldManager(private val api: Gamesys) {
 
         if (!result) {
             if (world != null) {
-                result = api.server.unloadWorld(world, true)
-                if (result) api.logger.logInfo("World $worldName was unloaded from memory") else api.logger.logWarning("World $worldName could not be unloaded")
+                result = plugin.server.unloadWorld(world, true)
+                if (result) plugin.logger.logInfo("World $worldName was unloaded from memory") else plugin.logger.logWarning("World $worldName could not be unloaded")
             }
 
             result = FileUtils.deleteFolder(File(worldName))
 
-            if (result) api.logger.logInfo("World $worldName was deleted") else api.logger.logInfo("World $worldName was not deleted")
+            if (result) plugin.logger.logInfo("World $worldName was deleted") else plugin.logger.logInfo("World $worldName was not deleted")
         }
 
         val workingDirectory = File("./plugins/WorldGuard/worlds/")
