@@ -1,0 +1,19 @@
+package net.minecord.gamesys.system
+
+import net.minecord.gamesys.arena.Arena
+import net.minecord.gamesys.game.Game
+import net.minecord.gamesys.game.player.GamePlayer
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.util.Vector
+import java.io.File
+
+interface System {
+    fun createArena(name: String, file: File, locations: HashMap<String, MutableList<Vector>>, minPlayers: Int? = null, maxPlayers: Int? = null): Arena
+
+    fun createGame(arena: Arena): Game
+
+    fun createGamePlayer(player: Player): GamePlayer
+
+    fun getArenaBlockMapping(): HashMap<String, Material>
+}
