@@ -13,8 +13,9 @@ import kotlin.collections.hashMapOf
 
 
 open class GamePlayer(val plugin: Gamesys, val player: Player) {
-    var storedItems = arrayOf<ItemStack>()
-    var storedArmorContents = arrayOf<ItemStack>()
+    private var storedItems = arrayOf<ItemStack>()
+    private var storedArmorContents = arrayOf<ItemStack>()
+    private var storedExtraContents = arrayOf<ItemStack>()
     var status = GamePlayerStatus.NONE
     var game: Game? = null
     var lastAttacker: GamePlayer? = null
@@ -52,13 +53,16 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
     fun storeAndClearInventory() {
         storedItems = player.inventory.contents.clone()
         storedArmorContents = player.inventory.armorContents.clone()
+        storedExtraContents = player.inventory.extraContents.clone()
         player.inventory.clear()
         player.inventory.setArmorContents(null)
+        player.inventory.setExtraContents(null)
     }
 
     open fun restoreInventory() {
         player.inventory.contents = storedItems
         player.inventory.setArmorContents(storedArmorContents)
+        player.inventory.setExtraContents(storedExtraContents)
     }
 
     open fun getGameItems(): HashMap<Int, ItemStack> {
