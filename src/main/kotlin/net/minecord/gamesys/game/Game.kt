@@ -20,17 +20,16 @@ import kotlin.math.atan2 as atan21
 
 open class Game(val plugin: Gamesys, val arena: Arena) {
     var status: GameStatus = GameStatus.PREPARING
-    val locations = hashMapOf<String, MutableList<Location>>()
-    val players = mutableListOf<GamePlayer>()
+    val locations = hashMapOf<String, ArrayList<Location>>()
+    val players = arrayListOf<GamePlayer>()
     val gameBar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
 
     open fun onArenaLoaded(editSession: EditSession, origin: Location) {
         for ((string, vectors) in arena.locations) {
-            locations[string] = mutableListOf()
+            locations[string] = arrayListOf()
             vectors.forEach {
-                it.add(origin.toVector())
-
-                val location = Location(origin.world, it.x, it.y, it.z).add(0.5, 0.toDouble(), 0.5)
+                val vector = origin.toVector().add(it)
+                val location = Location(origin.world, vector.x, vector.y, vector.z).add(0.5, 0.toDouble(), 0.5)
 
                 location.yaw = (atan21(
                     y = -(origin.x - location.x),
@@ -60,6 +59,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onPlayerLeft(player: GamePlayer) {
         players.remove(player)
         gameBar.removePlayer(player.player)
+        player.kills = 0
+        player.deaths = 0
         player.game = null
         player.status = GamePlayerStatus.NONE
         player.setGameMode(player.getLobbyMode())
@@ -169,7 +170,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                         cancel()
                         return
                     }
-                    countdown <= 10 || countdown % 10 == 0 -> {
+                    else -> {
                         players.forEach {
                             it.player.playSound(it.player.location, Sound.UI_BUTTON_CLICK, 3f, 1f)
                             if (winner != null) {
@@ -198,7 +199,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                             Random.nextInt(0, 255),
                             Random.nextInt(0, 255),
                             Random.nextInt(0, 255)
-                        )).with(FireworkEffect.Type.STAR).build(), getSpawnLocations().random().add(0.0, 5.0, 0.0))
+                        )).with(FireworkEffect.Type.BALL_LARGE).build(), getSpawnLocations().random().add(0.0, 5.0, 0.0))
                     }
                 }
             }
@@ -220,8 +221,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         if (winner != null) {
             sendMessage("&fPlayer ${winner.player.name} is the winner!")
         }
-        players.forEach {
-            onPlayerLeft(it)
+
+        var playersCount = players.size
+        while (playersCount > 0) {
+            playersCount--
+            onPlayerLeft(players[playersCount])
         }
     }
 

@@ -25,16 +25,18 @@ class WorldManager(private val plugin: Gamesys) {
     private lateinit var worldEditWorld: com.sk89q.worldedit.world.World
     private val pasteHeight = 93
     private val arenaBorder = 400
-    private val latestPasteX = 0
+    private var latestPasteX = 0
     var biggestArenaSize = 0
 
     fun insertArena(game: Game) {
+        val pasteTo = BlockVector3.at(latestPasteX + (biggestArenaSize/2) + arenaBorder, pasteHeight, 0)
+        latestPasteX = pasteTo.blockX
+
         TaskManager.IMP.async {
             try {
                 plugin.logger.logInfo("Pasting arena ${game.arena.name}")
 
                 val now = System.currentTimeMillis()
-                val pasteTo = BlockVector3.at(latestPasteX + (biggestArenaSize/2) + arenaBorder, pasteHeight, 0)
                 val clipboard = ClipboardFormats.findByFile(game.arena.file)?.getReader(game.arena.file.inputStream())?.read()
                 val clipboardHolder = ClipboardHolder(clipboard)
                 val editSession = EditSessionBuilder(BukkitWorld(bukkitWorld)).fastmode(true).build()
@@ -54,7 +56,7 @@ class WorldManager(private val plugin: Gamesys) {
 
                 editSession.close()
 
-                plugin.logger.logInfo("Arena ${game.arena.name} pasted (${(System.currentTimeMillis() - now)}ms)")
+                plugin.logger.logInfo("Arena ${game.arena.name} pasted at ${pasteTo.blockX} ${pasteTo.blockY} ${pasteTo.blockZ} (${(System.currentTimeMillis() - now)}ms)")
 
             } catch (e: Exception) {
                 Bukkit.broadcastMessage("Unable to paste arena.")

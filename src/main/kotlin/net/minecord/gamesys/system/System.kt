@@ -11,7 +11,7 @@ import org.bukkit.util.Vector
 import java.io.File
 
 interface System {
-    fun createArena(name: String, file: File, locations: HashMap<String, MutableList<Vector>>, minPlayers: Int? = null, maxPlayers: Int? = null): Arena
+    fun createArena(name: String, file: File, locations: HashMap<String, ArrayList<Vector>>, minPlayers: Int? = null, maxPlayers: Int? = null): Arena
 
     fun createGame(plugin: Gamesys, arena: Arena): Game
 

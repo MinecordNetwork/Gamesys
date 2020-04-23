@@ -51,9 +51,9 @@ class ArenaManager(private val plugin: Gamesys) {
 
                 val now = System.currentTimeMillis()
                 val clipboard = ClipboardFormats.findByFile(file)?.getReader(file.inputStream())?.read() ?: return
-                val locations = hashMapOf<String, MutableList<Vector>>()
+                val locations = hashMapOf<String, ArrayList<Vector>>()
                 for (string in mapping.keys) {
-                    locations[string] = mutableListOf()
+                    locations[string] = arrayListOf()
                 }
 
                 for (y in clipboard.minimumPoint.blockY..clipboard.maximumPoint.blockY) {
