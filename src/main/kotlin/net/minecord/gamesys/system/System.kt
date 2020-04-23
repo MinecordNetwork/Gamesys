@@ -15,9 +15,15 @@ interface System {
 
     fun createGame(plugin: Gamesys, arena: Arena): Game
 
-    fun createGamePlayer(player: Player): GamePlayer
+    fun createGamePlayer(plugin: Gamesys, player: Player): GamePlayer
 
     fun getArenaBlockMapping(): HashMap<String, Material>
 
     fun getSpawnLocation(): Location
+
+    fun isItemThrowingAllowed(): Boolean
+
+    fun disableHungerBar(): Boolean
+
+    fun dropItemsAfterDeath(): Boolean
 }

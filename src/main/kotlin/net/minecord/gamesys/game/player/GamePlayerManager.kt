@@ -25,7 +25,7 @@ open class GamePlayerManager(private val plugin: Gamesys) {
     }
 
     fun addPlayer(player: Player) {
-        players[player.uniqueId] = plugin.system.createGamePlayer(player)
+        players[player.uniqueId] = plugin.system.createGamePlayer(plugin, player)
     }
 
     fun removePlayer(player: Player) {

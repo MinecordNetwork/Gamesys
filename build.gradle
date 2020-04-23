@@ -6,7 +6,7 @@ plugins {
 group 'net.minecord'
 version '1.0-SNAPSHOT'
 
-def spigotVersion = '1.15-R0.1-SNAPSHOT'
+def spigotVersion = '1.15.2-R0.1-SNAPSHOT'
 def pluginName = 'Gamesys'
 
 sourceCompatibility = 1.8
@@ -22,12 +22,14 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.spigotmc', name: 'spigot-api', version: spigotVersion
+    implementation "org.spigotmc:spigot-api:$spigotVersion"
+    implementation "org.bukkit:spigot-server:1.15.2"
     implementation group: 'org.spigotmc', name: 'plugin-annotations', version: '1.2.2-SNAPSHOT'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation 'com.sk89q.worldedit:worldedit-core:7.2.0-SNAPSHOT'
     implementation 'com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT'
     implementation 'com.boydti:fawe-core:1.15-654'
+    implementation 'com.onarandombox:multiverse-core:4.1.1'
     implementation 'com.onarandombox:multiverse-core:4.1.1'
 }
 

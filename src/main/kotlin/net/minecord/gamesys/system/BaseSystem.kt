@@ -20,8 +20,8 @@ open class BaseSystem : System {
         return Game(plugin, arena)
     }
 
-    override fun createGamePlayer(player: Player): GamePlayer {
-        return GamePlayer(player)
+    override fun createGamePlayer(plugin: Gamesys, player: Player): GamePlayer {
+        return GamePlayer(plugin, player)
     }
 
     override fun getArenaBlockMapping(): HashMap<String, Material> {
@@ -35,5 +35,17 @@ open class BaseSystem : System {
 
     override fun getSpawnLocation(): Location {
         return Location(Bukkit.getWorld("EventWorld"), 683.toDouble(), 186.toDouble(), 131.toDouble())
+    }
+
+    override fun isItemThrowingAllowed(): Boolean {
+        return true
+    }
+
+    override fun disableHungerBar(): Boolean {
+        return false
+    }
+
+    override fun dropItemsAfterDeath(): Boolean {
+        return true
     }
 }
