@@ -3,22 +3,18 @@ package net.minecord.gamesys.game.player
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
 import org.bukkit.attribute.Attribute
-import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
-import org.bukkit.scheduler.BukkitRunnable
-import org.jetbrains.annotations.NotNull
 
 class GamePlayerListener(private val plugin: Gamesys) : Listener {
     @EventHandler
@@ -79,7 +75,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
 
     @EventHandler
     fun onPlayerHunger(event: FoodLevelChangeEvent) {
-        if (plugin.system.disableHungerBar()) {
+        if (plugin.system.isHungerBarDisabled()) {
             event.isCancelled = true
         }
     }

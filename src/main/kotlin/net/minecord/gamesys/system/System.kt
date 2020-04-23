@@ -23,7 +23,7 @@ interface System {
 
     fun isItemThrowingAllowed(): Boolean
 
-    fun disableHungerBar(): Boolean
+    fun isHungerBarDisabled(): Boolean
 
     fun dropItemsAfterDeath(): Boolean
 }

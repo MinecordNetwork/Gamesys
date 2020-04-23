@@ -76,7 +76,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun onDeathMessageSent(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
-        if (killer != null) sendMessage("&7player &c${player.player.name} &7was killed by &a${killer.player.name}")
+        if (killer != null) sendMessage("&c${player.player.name} &7was killed by &a${killer.player.name}")
         else sendMessage("&7player &c${player.player.name} &7died")
     }
 

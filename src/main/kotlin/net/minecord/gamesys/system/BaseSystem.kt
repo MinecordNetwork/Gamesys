@@ -41,7 +41,7 @@ open class BaseSystem : System {
         return true
     }
 
-    override fun disableHungerBar(): Boolean {
+    override fun isHungerBarDisabled(): Boolean {
         return false
     }
 
