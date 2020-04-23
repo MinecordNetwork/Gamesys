@@ -81,6 +81,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun onPlayerStartsToRespawn(player: GamePlayer) {
+        player.player.setItemOnCursor(null)
         player.player.inventory.clear()
         player.setGameMode(GameMode.SPECTATOR)
         player.status = GamePlayerStatus.RESPAWNING
