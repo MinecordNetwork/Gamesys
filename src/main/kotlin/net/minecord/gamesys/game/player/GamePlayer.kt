@@ -6,9 +6,15 @@ import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
+import kotlin.collections.HashMap
+import kotlin.collections.hashMapOf
+
 
 open class GamePlayer(val plugin: Gamesys, val player: Player) {
+    var storedItems = arrayOf<ItemStack>()
+    var storedArmorContents = arrayOf<ItemStack>()
     var status = GamePlayerStatus.NONE
     var game: Game? = null
     var lastAttacker: GamePlayer? = null
@@ -16,7 +22,7 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
     var kills = 0
     var deaths = 0
 
-    fun onAttack(lastAttacker: GamePlayer, damageCause: EntityDamageEvent.DamageCause) {
+    open fun onAttack(lastAttacker: GamePlayer, damageCause: EntityDamageEvent.DamageCause) {
         this.lastAttacker = lastAttacker
         this.lastDamageCause = damageCause
         object : BukkitRunnable() {
@@ -41,5 +47,33 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
                 player.gameMode = gameMode
             }
         }.runTask(plugin)
+    }
+
+    fun storeAndClearInventory() {
+        storedItems = player.inventory.contents.clone()
+        storedArmorContents = player.inventory.armorContents.clone()
+        player.inventory.clear()
+        player.inventory.setArmorContents(null)
+    }
+
+    open fun restoreInventory() {
+        player.inventory.contents = storedItems
+        player.inventory.setArmorContents(storedArmorContents)
+    }
+
+    open fun getGameItems(): HashMap<Int, ItemStack> {
+        return hashMapOf()
+    }
+
+    open fun getLobbyItems(): HashMap<Int, ItemStack> {
+        return hashMapOf()
+    }
+
+    open fun getGameMode(): GameMode {
+        return GameMode.SURVIVAL
+    }
+
+    open fun getLobbyMode(): GameMode {
+        return GameMode.ADVENTURE
     }
 }

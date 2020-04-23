@@ -14,7 +14,6 @@ import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.craftbukkit.v1_15_R1.boss.CraftBossBar
 import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.math.atan2 as atan21
 
@@ -49,8 +48,9 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         gameBar.addPlayer(player.player)
         player.game = this
         player.status = GamePlayerStatus.PLAYING
-        player.setGameMode(getLobbyMode(player))
+        player.setGameMode(player.getLobbyMode())
         player.teleport(getLobbyLocation(player))
+        player.storeAndClearInventory()
         if (status == GameStatus.WAITING && players.size >= getMinimumRequiredPlayers()) {
             onCountdownStarted()
         }
@@ -58,10 +58,12 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun onPlayerLeft(player: GamePlayer) {
         players.remove(player)
+        gameBar.removePlayer(player.player)
         player.game = null
         player.status = GamePlayerStatus.NONE
-        player.setGameMode(getLobbyMode(player))
+        player.setGameMode(player.getLobbyMode())
         player.teleport(plugin.system.getSpawnLocation())
+        player.restoreInventory()
     }
 
     open fun onPlayerDeath(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
@@ -103,10 +105,10 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onPlayerSpawn(player: GamePlayer) {
         player.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value!!
         player.player.foodLevel = 20
-        player.setGameMode(getGameMode(player))
+        player.setGameMode(player.getGameMode())
         player.teleport(getRespawnLocation(player))
         player.player.inventory.clear()
-        for ((slot, item) in getGameItems(player)) {
+        for ((slot, item) in player.getGameItems()) {
             player.player.inventory.setItem(slot, item)
         }
     }
@@ -184,22 +186,6 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun getLobbyLocation(gamePlayer: GamePlayer): Location {
         return getSpawnLocations().random()
-    }
-
-    open fun getGameItems(gamePlayer: GamePlayer): HashMap<Int, ItemStack> {
-        return hashMapOf()
-    }
-
-    open fun getLobbyItems(gamePlayer: GamePlayer): HashMap<Int, ItemStack> {
-        return hashMapOf()
-    }
-
-    open fun getGameMode(gamePlayer: GamePlayer): GameMode {
-        return GameMode.SURVIVAL
-    }
-
-    open fun getLobbyMode(gamePlayer: GamePlayer): GameMode {
-        return GameMode.ADVENTURE
     }
 
     open fun getMinimumRequiredPlayers(): Int {
