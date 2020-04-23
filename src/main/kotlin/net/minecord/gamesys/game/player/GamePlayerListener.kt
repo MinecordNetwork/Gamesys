@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerDropItemEvent
@@ -49,6 +50,18 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
             plugin.gamePlayerManager.get(e.entity as Player).onAttack(plugin.gamePlayerManager.get(attacker), e.cause)
 
         } else {
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onSelfDamage(e: EntityDamageEvent) {
+        if (e.entity !is Player) return
+
+        val victim = plugin.gamePlayerManager.get(e.entity as Player)
+        if (victim.game == null) return
+
+        if (victim.game!!.status != GameStatus.RUNNING) {
             e.isCancelled = true
         }
     }

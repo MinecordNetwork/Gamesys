@@ -7,16 +7,15 @@ import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
 import net.minecord.gamesys.utils.colored
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
-import org.bukkit.Location
-import org.bukkit.Sound
+import net.minecord.gamesys.utils.instantFirework
+import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.craftbukkit.v1_15_R1.boss.CraftBossBar
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.scheduler.BukkitRunnable
+import kotlin.random.Random
 import kotlin.math.atan2 as atan21
 
 open class Game(val plugin: Gamesys, val arena: Arena) {
@@ -54,7 +53,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.teleport(getLobbyLocation(player))
         player.storeAndClearInventory()
         if (status == GameStatus.WAITING && players.size >= getMinimumRequiredPlayers()) {
-            onCountdownStarted()
+            onStartCountdownStart()
         }
     }
 
@@ -129,9 +128,9 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         gameBar.setTitle("&f&lWaiting for more players".colored())
     }
 
-    open fun onCountdownStarted() {
+    open fun onStartCountdownStart() {
         status = GameStatus.STARTING
-        var countdown = getCountdownSeconds()
+        var countdown = getStartCountdown()
         object : BukkitRunnable() {
             override fun run() {
                 if (players.size < getMinimumRequiredPlayers()) {
@@ -159,6 +158,53 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         }.runTaskTimerAsynchronously(plugin, 0, 20)
     }
 
+    open fun onEndCountdownStart(winner: GamePlayer? = null) {
+        status = GameStatus.ENDING
+        var countdown = getEndCountdown()
+        object : BukkitRunnable() {
+            override fun run() {
+                when {
+                    countdown <= 0 -> {
+                        onGameEnd(winner)
+                        cancel()
+                        return
+                    }
+                    countdown <= 10 || countdown % 10 == 0 -> {
+                        players.forEach {
+                            it.player.playSound(it.player.location, Sound.UI_BUTTON_CLICK, 3f, 1f)
+                            if (winner != null) {
+                                it.player.sendTitle("&b&l${winner.player.name}".colored(), "&f&lIs the Winner".colored(), 0, 60, 20)
+                            } else {
+                                it.player.sendTitle("&c&l${countdown}".colored(), "&f&lGame has ended".colored(), 0, 60, 20)
+                            }
+                        }
+                    }
+                }
+                gameBar.setTitle("&f&lTeleport to lobby in in &c&l$countdown &f&lseconds".colored())
+                gameBar.progress = (countdown / countdown).toDouble()
+                countdown--
+            }
+        }.runTaskTimerAsynchronously(plugin, 0, 20)
+
+        object : BukkitRunnable() {
+            override fun run() {
+                when (status) {
+                    GameStatus.ENDED -> {
+                        cancel()
+                        return
+                    }
+                    else -> {
+                        instantFirework(FireworkEffect.builder().withColor(Color.fromRGB(
+                            Random.nextInt(0, 255),
+                            Random.nextInt(0, 255),
+                            Random.nextInt(0, 255)
+                        )).with(FireworkEffect.Type.STAR).build(), getSpawnLocations().random().add(0.0, 5.0, 0.0))
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 0, 5)
+    }
+
     open fun onGameStart() {
         status = GameStatus.RUNNING
         gameBar.isVisible = false
@@ -169,9 +215,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         }
     }
 
-    open fun onGameEnd(winner: GamePlayer) {
-        status = GameStatus.ENDING
-        sendMessage("&fPlayer ${winner.player.name} is the winner!")
+    open fun onGameEnd(winner: GamePlayer? = null) {
+        status = GameStatus.ENDED
+        if (winner != null) {
+            sendMessage("&fPlayer ${winner.player.name} is the winner!")
+        }
         players.forEach {
             onPlayerLeft(it)
         }
@@ -207,7 +255,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         return 3
     }
 
-    open fun getCountdownSeconds(): Int {
+    open fun getStartCountdown(): Int {
         return 25
+    }
+
+    open fun getEndCountdown(): Int {
+        return 15
     }
 }
