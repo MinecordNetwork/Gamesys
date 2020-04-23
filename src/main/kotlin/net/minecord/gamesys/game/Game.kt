@@ -5,7 +5,9 @@ import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
+import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
 import net.minecord.gamesys.utils.colored
+import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Sound
@@ -78,8 +80,17 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun onDeathMessageSent(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
-        if (killer != null) sendMessage("&c${player.player.name} &7was killed by &a${killer.player.name}")
-        else sendMessage("&7player &c${player.player.name} &7died")
+        val message: String = if (killer != null) {
+            "&c${player.player.name} &7was killed by &a${killer.player.name}"
+        } else {
+            "&7player &c${player.player.name} &7died"
+        }
+
+        val event = DeathMessageSentEvent(player, cause, killer, message)
+
+        Bukkit.getPluginManager().callEvent(event)
+
+        sendMessage(event.deathMessage)
     }
 
     open fun onPlayerStartsToRespawn(player: GamePlayer) {
