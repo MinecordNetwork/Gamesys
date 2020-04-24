@@ -6,6 +6,7 @@ import com.boydti.fawe.util.TaskManager
 import com.onarandombox.MultiverseCore.MultiverseCore
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
 import com.onarandombox.MultiverseCore.utils.FileUtils
+import com.sk89q.worldedit.EditSession
 import com.sk89q.worldedit.bukkit.BukkitWorld
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.operation.Operation
@@ -17,46 +18,108 @@ import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
 import org.bukkit.*
 import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.util.Vector
 import java.io.File
+import kotlin.math.atan2
 
 class WorldManager(private val plugin: Gamesys) {
     private val worldName = "world_arenas"
     private lateinit var bukkitWorld: World
     private lateinit var worldEditWorld: com.sk89q.worldedit.world.World
+    private val lobbyFile = File("./plugins/${plugin.name}", "Lobby.schem")
+    private lateinit var lobbySpawnLocation: Vector
     private val pasteHeight = 93
-    private val arenaBorder = 400
-    private var latestPasteX = 0
+    private val border = 400
+    private var lastX = 0
+    private var lastZ = 0
     var biggestArenaSize = 0
 
-    fun insertArena(game: Game) {
-        val pasteTo = BlockVector3.at(latestPasteX + (biggestArenaSize/2) + arenaBorder, pasteHeight, 0)
-        latestPasteX = pasteTo.blockX
+    fun enable() {
+        loadWorld()
+        analyzeLobby()
+    }
+
+    private fun analyzeLobby() {
+        object : BukkitRunnable() {
+            override fun run() {
+                plugin.logger.logInfo("Analyzing lobby schematic")
+
+                if (!lobbyFile.exists()) {
+                    plugin.logger.logError("Lobby schematic does not exist")
+                    return
+                }
+
+                val now = System.currentTimeMillis()
+                val clipboard =
+                    ClipboardFormats.findByFile(lobbyFile)?.getReader(lobbyFile.inputStream())?.read() ?: return
+
+                for (y in clipboard.minimumPoint.blockY..clipboard.maximumPoint.blockY) {
+                    for (x in clipboard.minimumPoint.blockX..clipboard.maximumPoint.blockX) {
+                        for (z in clipboard.minimumPoint.blockZ..clipboard.maximumPoint.blockZ) {
+                            val blockState = clipboard.getBlock(BlockVector3.at(x, y, z))
+                            if (blockState.blockType == BlockTypes.WHITE_GLAZED_TERRACOTTA) {
+                                lobbySpawnLocation = Vector(x, y, z).subtract(
+                                    Vector(
+                                        clipboard.origin.x,
+                                        clipboard.origin.y,
+                                        clipboard.origin.z
+                                    )
+                                )
+                                plugin.logger.logInfo("Lobby schematic analyzed in ${(System.currentTimeMillis() - now)}ms")
+                                return
+                            }
+                        }
+                    }
+                }
+
+                plugin.logger.logError("Lobby schematic does not have a spawn! (WHITE_GLAZED_TERRACOTTA)")
+            }
+        }.runTaskAsynchronously(plugin)
+    }
+
+    fun loadGame(game: Game) {
+        val arenaOrigin = BlockVector3.at(lastX + (biggestArenaSize/2) + border, pasteHeight, 0)
+        lastX = arenaOrigin.blockX
+
+        val lobbyOrigin = BlockVector3.at(0, pasteHeight, lastZ + border)
+        lastZ = lobbyOrigin.blockZ
 
         TaskManager.IMP.async {
             try {
+                plugin.logger.logInfo("Pasting lobby for arena ${game.arena.name}")
+
+                var now = System.currentTimeMillis()
+                val editSessionLobby = pasteSchematic(lobbyFile, lobbyOrigin)
+
+                val lobbySpawn = lobbyOrigin.add(lobbySpawnLocation.blockX, lobbySpawnLocation.blockY, lobbySpawnLocation.blockZ)
+                val lobbyLocation = Location(bukkitWorld, lobbySpawn.x.toDouble(), lobbySpawn.y.toDouble(), lobbySpawn.z.toDouble())
+                lobbyLocation.yaw = (atan2(
+                    y = -(lobbyOrigin.x - lobbyLocation.x),
+                    x = lobbyOrigin.z - lobbyLocation.z
+                ) * (180.0 / Math.PI)).toFloat()
+                lobbyLocation.pitch = 0f
+
+                editSessionLobby.setBlock(BlockVector3.at(lobbySpawn.blockX, lobbySpawn.blockY, lobbySpawn.blockZ), BlockTypes.AIR?.defaultState)
+                editSessionLobby.close()
+
+                plugin.logger.logInfo("Lobby for arena ${game.arena.name} pasted at ${lobbyOrigin.blockX} ${lobbyOrigin.blockY} ${lobbyOrigin.blockZ} (${(System.currentTimeMillis() - now)}ms)")
                 plugin.logger.logInfo("Pasting arena ${game.arena.name}")
 
-                val now = System.currentTimeMillis()
-                val clipboard = ClipboardFormats.findByFile(game.arena.file)?.getReader(game.arena.file.inputStream())?.read()
-                val clipboardHolder = ClipboardHolder(clipboard)
-                val editSession = EditSessionBuilder(BukkitWorld(bukkitWorld)).fastmode(true).build()
-                val operation: Operation = clipboardHolder
-                    .createPaste(editSession)
-                    .to(pasteTo)
-                    .ignoreAirBlocks(true)
-                    .build()
+                now = System.currentTimeMillis()
+                val editSession = pasteSchematic(game.arena.file, arenaOrigin)
 
-                Operations.complete(operation)
-
-                game.onArenaLoaded(editSession, Location(bukkitWorld, pasteTo.x.toDouble(), pasteTo.y.toDouble(), pasteTo.z.toDouble()))
+                game.onArenaLoaded(
+                    editSession,
+                    Location(bukkitWorld, arenaOrigin.x.toDouble(), arenaOrigin.y.toDouble(), arenaOrigin.z.toDouble()),
+                    lobbyLocation
+                )
 
                 game.getSpawnLocations().forEach {
                     editSession.setBlock(BlockVector3.at(it.blockX, it.blockY, it.blockZ), BlockTypes.AIR?.defaultState)
                 }
-
                 editSession.close()
 
-                plugin.logger.logInfo("Arena ${game.arena.name} pasted at ${pasteTo.blockX} ${pasteTo.blockY} ${pasteTo.blockZ} (${(System.currentTimeMillis() - now)}ms)")
+                plugin.logger.logInfo("Arena ${game.arena.name} pasted at ${arenaOrigin.blockX} ${arenaOrigin.blockY} ${arenaOrigin.blockZ} (${(System.currentTimeMillis() - now)}ms)")
 
             } catch (e: Exception) {
                 Bukkit.broadcastMessage("Unable to paste arena.")
@@ -64,7 +127,22 @@ class WorldManager(private val plugin: Gamesys) {
         }
     }
 
-    fun loadWorld(): World {
+    private fun pasteSchematic(file: File, location: BlockVector3): EditSession {
+        val clipboard = ClipboardFormats.findByFile(file)?.getReader(file.inputStream())?.read()
+        val clipboardHolder = ClipboardHolder(clipboard)
+        val editSession = EditSessionBuilder(BukkitWorld(bukkitWorld)).fastmode(true).build()
+        val operation: Operation = clipboardHolder
+            .createPaste(editSession)
+            .to(location)
+            .ignoreAirBlocks(true)
+            .build()
+
+        Operations.complete(operation)
+
+        return editSession
+    }
+
+    private fun loadWorld(): World {
         plugin.logger.logInfo("Loading world")
 
         deleteWorld()

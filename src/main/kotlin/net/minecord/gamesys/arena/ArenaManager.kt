@@ -1,6 +1,5 @@
 package net.minecord.gamesys.arena
 
-import com.boydti.fawe.util.TaskManager
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldedit.world.block.BlockType
@@ -14,7 +13,11 @@ import java.io.IOException
 class ArenaManager(private val plugin: Gamesys) {
     val arenas = arrayListOf<Arena>()
 
-    fun loadArenas() {
+    fun enable() {
+        loadArenas()
+    }
+
+    private fun loadArenas() {
         if (arenas.isNotEmpty())
             arenas.clear()
 
@@ -37,14 +40,14 @@ class ArenaManager(private val plugin: Gamesys) {
             }
 
             try {
-                registerArena(schematic, mapping)
+                analyzeArena(schematic, mapping)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
     }
 
-    private fun registerArena(file: File, mapping: HashMap<String, BlockType>) {
+    private fun analyzeArena(file: File, mapping: HashMap<String, BlockType>) {
         object : BukkitRunnable() {
             override fun run() {
                 plugin.logger.logInfo("Analyzing schematic ${file.name}")
@@ -75,7 +78,6 @@ class ArenaManager(private val plugin: Gamesys) {
                 }
 
                 arenas.add(plugin.system.createArena(file.name.replace(".schematic", ""), file, locations))
-
 
                 plugin.logger.logInfo("Schematic ${file.name} analyzed (${(System.currentTimeMillis() - now)}ms with ${locations["spawns"]?.size} spawns and ${locations["chests"]?.size} chests).")
             }

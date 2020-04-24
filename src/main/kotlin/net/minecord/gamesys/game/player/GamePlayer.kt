@@ -34,6 +34,21 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
         }.runTaskLaterAsynchronously(plugin, 100)
     }
 
+    fun storeAndClearInventory() {
+        storedItems = player.inventory.contents.clone()
+        storedArmorContents = player.inventory.armorContents.clone()
+        storedExtraContents = player.inventory.extraContents.clone()
+        player.inventory.clear()
+        player.inventory.setArmorContents(null)
+        player.inventory.setExtraContents(null)
+    }
+
+    open fun restoreInventory() {
+        player.inventory.contents = storedItems
+        player.inventory.setArmorContents(storedArmorContents)
+        player.inventory.setExtraContents(storedExtraContents)
+    }
+
     fun teleport(location: Location) {
         object : BukkitRunnable() {
             override fun run() {
@@ -50,21 +65,6 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
         }.runTask(plugin)
     }
 
-    fun storeAndClearInventory() {
-        storedItems = player.inventory.contents.clone()
-        storedArmorContents = player.inventory.armorContents.clone()
-        storedExtraContents = player.inventory.extraContents.clone()
-        player.inventory.clear()
-        player.inventory.setArmorContents(null)
-        player.inventory.setExtraContents(null)
-    }
-
-    open fun restoreInventory() {
-        player.inventory.contents = storedItems
-        player.inventory.setArmorContents(storedArmorContents)
-        player.inventory.setExtraContents(storedExtraContents)
-    }
-
     open fun getGameItems(): HashMap<Int, ItemStack> {
         return hashMapOf()
     }
@@ -73,11 +73,11 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
         return hashMapOf()
     }
 
-    open fun getGameMode(): GameMode {
+    open fun getDefaultGameMode(): GameMode {
         return GameMode.SURVIVAL
     }
 
-    open fun getLobbyMode(): GameMode {
+    open fun getLobbyGameMode(): GameMode {
         return GameMode.ADVENTURE
     }
 }

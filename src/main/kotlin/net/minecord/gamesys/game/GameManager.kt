@@ -8,7 +8,7 @@ class GameManager(val plugin: Gamesys) {
 
     fun createTestGame(arena: Arena): Game {
         testGame = plugin.system.createGame(plugin, arena)
-        plugin.worldManager.insertArena(testGame)
+        plugin.worldManager.loadGame(testGame)
         return testGame
     }
 }

@@ -8,13 +8,21 @@ import java.util.*
 open class GamePlayerManager(private val plugin: Gamesys) {
     val players = hashMapOf<UUID, GamePlayer>()
 
-    fun loadPlayers() {
+    fun enable() {
+        loadPlayers()
+    }
+
+    fun disable() {
+        unloadPlayers()
+    }
+
+    private fun loadPlayers() {
         for (player: Player in Bukkit.getOnlinePlayers()) {
             addPlayer(player)
         }
     }
 
-    fun unloadPlayers() {
+    private fun unloadPlayers() {
         for (player: Player in Bukkit.getOnlinePlayers()) {
             removePlayer(player)
         }

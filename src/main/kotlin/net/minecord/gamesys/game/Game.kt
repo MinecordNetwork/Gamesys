@@ -21,11 +21,12 @@ import kotlin.math.atan2 as atan21
 open class Game(val plugin: Gamesys, val arena: Arena) {
     var status: GameStatus = GameStatus.PREPARING
     val locations = hashMapOf<String, ArrayList<Location>>()
+    lateinit var lobbyLocation: Location
     val players = arrayListOf<GamePlayer>()
     val bar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
     val board = plugin.system.createGameBoard(plugin, this)
 
-    open fun onArenaLoaded(editSession: EditSession, origin: Location) {
+    open fun onArenaLoaded(editSession: EditSession, origin: Location, lobbyLocation: Location) {
         for ((string, vectors) in arena.locations) {
             locations[string] = arrayListOf()
             vectors.forEach {
@@ -41,6 +42,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                 locations[string]?.add(location)
             }
         }
+        this.lobbyLocation = lobbyLocation
         status = GameStatus.WAITING
     }
 
@@ -50,8 +52,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         board.addPlayer(player)
         player.game = this
         player.status = GamePlayerStatus.PLAYING
-        player.setGameMode(player.getLobbyMode())
-        player.teleport(getLobbyLocation(player))
+        player.player.gameMode = player.getLobbyGameMode()
+        player.player.teleport(getLobbyLocation(player))
         player.storeAndClearInventory()
         if (status == GameStatus.WAITING && players.size >= getMinimumRequiredPlayers()) {
             onStartCountdownStart()
@@ -66,8 +68,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.deaths = 0
         player.game = null
         player.status = GamePlayerStatus.NONE
-        player.setGameMode(player.getLobbyMode())
-        player.teleport(plugin.system.getSpawnLocation())
+        player.player.gameMode = player.getLobbyGameMode()
+        player.player.teleport(plugin.system.getSpawnLocation())
         player.restoreInventory()
     }
 
@@ -99,14 +101,18 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onPlayerStartsToRespawn(player: GamePlayer) {
         player.player.setItemOnCursor(null)
         player.player.inventory.clear()
-        player.setGameMode(GameMode.SPECTATOR)
+        player.player.gameMode = GameMode.SPECTATOR
         player.status = GamePlayerStatus.RESPAWNING
 
         object : BukkitRunnable() {
             var counter = getRespawnCooldown()
             override fun run() {
                 if (counter <= 0) {
-                    onPlayerSpawn(player)
+                    object : BukkitRunnable() {
+                        override fun run() {
+                            onPlayerSpawn(player)
+                        }
+                    }.runTask(plugin)
                     cancel()
                     return
                 }
@@ -119,8 +125,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onPlayerSpawn(player: GamePlayer) {
         player.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value!!
         player.player.foodLevel = 20
-        player.setGameMode(player.getGameMode())
-        player.teleport(getRespawnLocation(player))
+        player.player.gameMode = player.getDefaultGameMode()
+        player.player.teleport(getRespawnLocation(player))
         player.player.inventory.clear()
         for ((slot, item) in player.getGameItems()) {
             player.player.inventory.setItem(slot, item)
@@ -144,7 +150,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                 }
                 when {
                     countdown <= 0 -> {
-                        onGameStart()
+                        object : BukkitRunnable() {
+                            override fun run() {
+                                onGameStart()
+                            }
+                        }.runTask(plugin)
                         cancel()
                         return
                     }
@@ -169,7 +179,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             override fun run() {
                 when {
                     countdown <= 0 -> {
-                        onGameEnd(winner)
+                        object : BukkitRunnable() {
+                            override fun run() {
+                                onGameEnd(winner)
+                            }
+                        }.runTask(plugin)
                         cancel()
                         return
                     }
@@ -247,11 +261,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun getRespawnLocation(gamePlayer: GamePlayer): Location {
-        return getSpawnLocations().random()
+        return getSpawnLocations().random().clone().add(0.0, 0.01, 0.0)
     }
 
     open fun getLobbyLocation(gamePlayer: GamePlayer): Location {
-        return getSpawnLocations().random()
+        return lobbyLocation.clone().add(0.0, 0.01, 0.0)
     }
 
     open fun getMinimumRequiredPlayers(): Int {

@@ -49,6 +49,12 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
 
             plugin.gamePlayerManager.get(e.entity as Player).onAttack(plugin.gamePlayerManager.get(attacker), e.cause)
 
+            if (e.finalDamage > victim.player.health) {
+                victim.player.inventory.clear()
+                victim.player.health = victim.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+                victim.game?.onPlayerDeath(victim, null, victim.lastAttacker)
+            }
+
         } else {
             e.isCancelled = true
         }
@@ -59,9 +65,12 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         if (e.entity !is Player) return
 
         val victim = plugin.gamePlayerManager.get(e.entity as Player)
-        if (victim.game == null) return
+        val game = victim.game ?: return
 
-        if (victim.game!!.status != GameStatus.RUNNING) {
+        if (game.status != GameStatus.RUNNING) {
+            if (e.cause == EntityDamageEvent.DamageCause.VOID) {
+                victim.player.teleport(game.getLobbyLocation(victim))
+            }
             e.isCancelled = true
         }
     }

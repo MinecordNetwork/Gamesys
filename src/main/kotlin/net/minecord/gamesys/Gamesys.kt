@@ -21,14 +21,14 @@ open class Gamesys: JavaPlugin() {
     fun run(factory: System) {
         system = factory
 
-        gamePlayerManager.loadPlayers()
-        arenaManager.loadArenas()
-        worldManager.loadWorld()
+        gamePlayerManager.enable()
+        arenaManager.enable()
+        worldManager.enable()
 
         Bukkit.getPluginManager().registerEvents(GamePlayerListener(this), this)
     }
 
     fun stop() {
-        gamePlayerManager.unloadPlayers()
+        gamePlayerManager.disable()
     }
 }

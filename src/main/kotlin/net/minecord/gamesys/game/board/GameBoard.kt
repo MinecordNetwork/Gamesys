@@ -29,11 +29,11 @@ open class GameBoard(val plugin: Gamesys, val game: Game) {
 
     open fun update() {
         //TODO: Limit to 15 lines
+        val lines = getLines()
         for (player in game.players) {
-            Bukkit.broadcastMessage("Updating sidebar for ${player.player.name}")
             val private = board.getPlayer(player.player).privateSidebar
             private.displayName = getTitle()
-            private.rewriteLines(getLines())
+            private.rewriteLines(lines)
             private.showSidebar()
         }
     }
