@@ -22,7 +22,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     var status: GameStatus = GameStatus.PREPARING
     val locations = hashMapOf<String, ArrayList<Location>>()
     val players = arrayListOf<GamePlayer>()
-    val gameBar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
+    val bar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
+    val board = plugin.system.createGameBoard(plugin, this)
 
     open fun onArenaLoaded(editSession: EditSession, origin: Location) {
         for ((string, vectors) in arena.locations) {
@@ -45,7 +46,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun onPlayerJoined(player: GamePlayer) {
         players.add(player)
-        gameBar.addPlayer(player.player)
+        bar.addPlayer(player.player)
+        board.addPlayer(player)
         player.game = this
         player.status = GamePlayerStatus.PLAYING
         player.setGameMode(player.getLobbyMode())
@@ -58,7 +60,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun onPlayerLeft(player: GamePlayer) {
         players.remove(player)
-        gameBar.removePlayer(player.player)
+        bar.removePlayer(player.player)
+        board.removePlayer(player)
         player.kills = 0
         player.deaths = 0
         player.game = null
@@ -126,7 +129,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun onStartWaiting() {
         status = GameStatus.WAITING
-        gameBar.setTitle("&f&lWaiting for more players".colored())
+        bar.setTitle("&f&lWaiting for more players".colored())
     }
 
     open fun onStartCountdownStart() {
@@ -152,8 +155,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                         }
                     }
                 }
-                gameBar.setTitle("&f&lGame starts in &e&l$countdown &f&lseconds".colored())
-                gameBar.progress = (countdown / countdown).toDouble()
+                bar.setTitle("&f&lGame starts in &e&l$countdown &f&lseconds".colored())
+                bar.progress = (countdown / countdown).toDouble()
                 countdown--
             }
         }.runTaskTimerAsynchronously(plugin, 0, 20)
@@ -181,8 +184,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                         }
                     }
                 }
-                gameBar.setTitle("&f&lTeleport to lobby in in &c&l$countdown &f&lseconds".colored())
-                gameBar.progress = (countdown / countdown).toDouble()
+                bar.setTitle("&f&lTeleport to lobby in in &c&l$countdown &f&lseconds".colored())
+                bar.progress = (countdown / countdown).toDouble()
                 countdown--
             }
         }.runTaskTimerAsynchronously(plugin, 0, 20)
@@ -208,7 +211,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun onGameStart() {
         status = GameStatus.RUNNING
-        gameBar.isVisible = false
+        bar.isVisible = false
         players.forEach {
             onPlayerSpawn(it)
             it.player.playSound(it.player.location, Sound.BLOCK_ANVIL_USE, 10.toFloat(), 1.toFloat())

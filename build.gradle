@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT'
     implementation 'com.boydti:fawe-core:1.15-654'
     implementation 'com.onarandombox:multiverse-core:4.1.1'
-    implementation 'com.onarandombox:multiverse-core:4.1.1'
+    implementation 'net.minecord:xoreboard-util:1.0'
 }
 
 jar {

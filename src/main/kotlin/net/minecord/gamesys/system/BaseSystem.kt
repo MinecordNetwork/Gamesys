@@ -3,6 +3,7 @@ package net.minecord.gamesys.system
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.Game
+import net.minecord.gamesys.game.board.GameBoard
 import net.minecord.gamesys.game.player.GamePlayer
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -22,6 +23,10 @@ open class BaseSystem : System {
 
     override fun createGamePlayer(plugin: Gamesys, player: Player): GamePlayer {
         return GamePlayer(plugin, player)
+    }
+
+    override fun createGameBoard(plugin: Gamesys, game: Game): GameBoard {
+        return GameBoard(plugin, game)
     }
 
     override fun getArenaBlockMapping(): HashMap<String, Material> {
