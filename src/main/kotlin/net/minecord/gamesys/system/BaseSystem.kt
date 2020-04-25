@@ -42,6 +42,10 @@ open class BaseSystem : System {
         return Location(Bukkit.getWorld("EventWorld"), 683.toDouble(), 186.toDouble(), 131.toDouble())
     }
 
+    override fun getMinumumPreparedGamesCount(): Int {
+        return 1
+    }
+
     override fun isItemThrowingAllowed(): Boolean {
         return true
     }

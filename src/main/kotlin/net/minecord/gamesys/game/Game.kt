@@ -26,7 +26,12 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     val bar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
     val board = plugin.system.createGameBoard(plugin, this)
 
+    init {
+        plugin.worldManager.loadGame(this)
+    }
+
     open fun onArenaLoaded(editSession: EditSession, origin: Location, lobbyLocation: Location) {
+        status = GameStatus.WAITING
         for ((string, vectors) in arena.locations) {
             locations[string] = arrayListOf()
             vectors.forEach {
@@ -43,7 +48,6 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             }
         }
         this.lobbyLocation = lobbyLocation
-        status = GameStatus.WAITING
     }
 
     open fun onPlayerJoined(player: GamePlayer) {
@@ -244,6 +248,8 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             playersCount--
             onPlayerLeft(players[playersCount])
         }
+
+        plugin.gameManager.removeGame(this)
     }
 
     open fun sendMessage(message: String) {

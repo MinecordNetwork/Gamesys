@@ -12,6 +12,7 @@ import java.io.IOException
 
 class ArenaManager(private val plugin: Gamesys) {
     val arenas = arrayListOf<Arena>()
+    var analyzedArenas = 0
 
     fun enable() {
         loadArenas()
@@ -80,6 +81,11 @@ class ArenaManager(private val plugin: Gamesys) {
                 arenas.add(plugin.system.createArena(file.name.replace(".schematic", ""), file, locations))
 
                 plugin.logger.logInfo("Schematic ${file.name} analyzed (${(System.currentTimeMillis() - now)}ms with ${locations["spawns"]?.size} spawns and ${locations["chests"]?.size} chests).")
+                analyzedArenas++
+
+                if (analyzedArenas == arenas.size) {
+                    plugin.gameManager.enable()
+                }
             }
         }.runTaskAsynchronously(plugin)
     }

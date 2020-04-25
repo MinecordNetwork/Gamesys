@@ -24,6 +24,8 @@ interface System {
 
     fun getSpawnLocation(): Location
 
+    fun getMinumumPreparedGamesCount(): Int
+
     fun isItemThrowingAllowed(): Boolean
 
     fun isHungerBarDisabled(): Boolean
