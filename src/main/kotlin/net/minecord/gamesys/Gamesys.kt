@@ -22,8 +22,8 @@ open class Gamesys: JavaPlugin() {
         system = factory
 
         gamePlayerManager.enable()
-        //arenaManager.enable()
-        //worldManager.enable()
+        arenaManager.enable()
+        worldManager.enable()
 
         Bukkit.getPluginManager().registerEvents(GamePlayerListener(this), this)
     }

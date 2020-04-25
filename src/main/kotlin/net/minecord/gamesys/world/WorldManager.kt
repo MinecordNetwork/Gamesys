@@ -202,6 +202,7 @@ class WorldManager(private val plugin: Gamesys) {
                 world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
                 world.setGameRule(GameRule.DO_FIRE_TICK, false)
                 world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
+                world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true)
             }
         }
 
