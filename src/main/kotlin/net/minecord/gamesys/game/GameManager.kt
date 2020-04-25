@@ -4,12 +4,12 @@ import net.minecord.gamesys.Gamesys
 import org.bukkit.scheduler.BukkitRunnable
 
 class GameManager(val plugin: Gamesys) {
-    val games = mutableListOf<Game>()
+    private val games = mutableListOf<Game>()
 
     fun enable() {
         object : BukkitRunnable() {
             override fun run() {
-                if (getAvailableGames().size < plugin.system.getMinumumPreparedGamesCount()) {
+                if (getAvailableGames().size < plugin.system.getMinimumPreparedGamesCount()) {
                     addGame()
                 }
             }
@@ -17,8 +17,10 @@ class GameManager(val plugin: Gamesys) {
     }
 
     fun disable() {
-        for (game in games) {
-            game.onGameEnd()
+        var count = games.size
+        while (count > 0) {
+            count--
+            games[count].onGameEnd()
         }
     }
 
@@ -40,6 +42,6 @@ class GameManager(val plugin: Gamesys) {
     }
 
     fun getAvailableGames(): List<Game> {
-        return games.filter { it.status == GameStatus.WAITING || it.status == GameStatus.STARTING || it.status == GameStatus.PREPARING }
+        return games.filter { (it.status == GameStatus.WAITING || it.status == GameStatus.STARTING || it.status == GameStatus.PREPARING) && !it.isFull() }
     }
 }

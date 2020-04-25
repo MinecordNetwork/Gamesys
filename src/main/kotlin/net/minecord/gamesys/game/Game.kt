@@ -19,12 +19,14 @@ import kotlin.random.Random
 import kotlin.math.atan2 as atan21
 
 open class Game(val plugin: Gamesys, val arena: Arena) {
+    val players = mutableListOf<GamePlayer>()
     var status: GameStatus = GameStatus.PREPARING
-    val locations = hashMapOf<String, ArrayList<Location>>()
+    var startCountdownCounter = 0
+    var invinciblePlayers = true
+    protected val locations = hashMapOf<String, MutableList<Location>>()
+    protected val bar: CraftBossBar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
+    protected val board = plugin.system.createGameBoard(plugin, this)
     lateinit var lobbyLocation: Location
-    val players = arrayListOf<GamePlayer>()
-    val bar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
-    val board = plugin.system.createGameBoard(plugin, this)
 
     init {
         plugin.worldManager.loadGame(this)
@@ -48,6 +50,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             }
         }
         this.lobbyLocation = lobbyLocation
+        plugin.gamePortalManager.update()
     }
 
     open fun onPlayerJoined(player: GamePlayer) {
@@ -56,12 +59,15 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         board.addPlayer(player)
         player.game = this
         player.status = GamePlayerStatus.PLAYING
+        player.player.allowFlight = false
         player.player.gameMode = player.getLobbyGameMode()
         player.player.teleport(getLobbyLocation(player))
         player.storeAndClearInventory()
         if (status == GameStatus.WAITING && players.size >= getMinimumRequiredPlayers()) {
             onStartCountdownStart()
         }
+        plugin.worldManager.fixRespawnScreen()
+        plugin.gamePortalManager.update()
     }
 
     open fun onPlayerLeft(player: GamePlayer) {
@@ -75,6 +81,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.player.gameMode = player.getLobbyGameMode()
         player.player.teleport(plugin.system.getSpawnLocation())
         player.restoreInventory()
+        plugin.gamePortalManager.update()
     }
 
     open fun onPlayerDeath(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
@@ -85,7 +92,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         }
 
         onDeathMessageSent(player, cause, killer)
-        onPlayerStartsToRespawn(player)
+        onPlayerStartsToRespawn(player, cause, killer)
     }
 
     open fun onDeathMessageSent(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
@@ -102,7 +109,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         sendMessage(event.deathMessage)
     }
 
-    open fun onPlayerStartsToRespawn(player: GamePlayer) {
+    open fun onPlayerStartsToRespawn(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
         player.player.setItemOnCursor(null)
         player.player.inventory.clear()
         player.player.gameMode = GameMode.SPECTATOR
@@ -120,7 +127,6 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                     cancel()
                     return
                 }
-                player.player.sendTitle("&e&l$counter".colored(), "&f&lRespawning".colored(), 0, 25, 0)
                 counter--
             }
         }.runTaskTimerAsynchronously(plugin, 0, 20)
@@ -131,6 +137,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.player.foodLevel = 20
         player.player.gameMode = player.getDefaultGameMode()
         player.player.teleport(getRespawnLocation(player))
+        player.player.location.world?.playSound(player.player.location, Sound.ITEM_ARMOR_EQUIP_GENERIC, 10f, 1f)
         player.player.inventory.clear()
         for ((slot, item) in player.getGameItems()) {
             player.player.inventory.setItem(slot, item)
@@ -144,7 +151,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
 
     open fun onStartCountdownStart() {
         status = GameStatus.STARTING
-        var countdown = getStartCountdown()
+        startCountdownCounter = getStartCountdown()
         object : BukkitRunnable() {
             override fun run() {
                 if (players.size < getMinimumRequiredPlayers()) {
@@ -153,7 +160,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                     return
                 }
                 when {
-                    countdown <= 0 -> {
+                    startCountdownCounter <= 0 -> {
                         object : BukkitRunnable() {
                             override fun run() {
                                 onGameStart()
@@ -162,16 +169,17 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                         cancel()
                         return
                     }
-                    countdown <= 10 || countdown % 10 == 0 -> {
+                    startCountdownCounter <= 10 || startCountdownCounter % 10 == 0 -> {
                         players.forEach {
                             it.player.playSound(it.player.location, Sound.UI_BUTTON_CLICK, 10f, 1f)
-                            it.player.sendTitle("&e&l$countdown".colored(), "&f&lThe Game is Starting".colored(), 0, 60, 20)
+                            it.player.sendTitle("&e&l$startCountdownCounter".colored(), "&f&lThe Game is Starting".colored(), 0, 60, 20)
                         }
                     }
                 }
-                bar.setTitle("&f&lGame starts in &e&l$countdown &f&lseconds".colored())
-                bar.progress = (countdown / countdown).toDouble()
-                countdown--
+                bar.setTitle("&f&lGame starts in &e&l$startCountdownCounter &f&lseconds".colored())
+                bar.progress = (startCountdownCounter / getStartCountdown()).toDouble()
+                plugin.gamePortalManager.update()
+                startCountdownCounter--
             }
         }.runTaskTimerAsynchronously(plugin, 0, 20)
     }
@@ -194,14 +202,10 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                     else -> {
                         players.forEach {
                             it.player.playSound(it.player.location, Sound.UI_BUTTON_CLICK, 3f, 1f)
-                            if (winner != null) {
-                                it.player.sendTitle("&b&l${winner.player.name}".colored(), "&f&lIs the Winner".colored(), 0, 60, 20)
-                            } else {
-                                it.player.sendTitle("&c&l${countdown}".colored(), "&f&lGame has ended".colored(), 0, 60, 20)
-                            }
                         }
                     }
                 }
+                bar.isVisible = true
                 bar.setTitle("&f&lTeleport to lobby in in &c&l$countdown &f&lseconds".colored())
                 bar.progress = (countdown / countdown).toDouble()
                 countdown--
@@ -232,16 +236,20 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         bar.isVisible = false
         players.forEach {
             onPlayerSpawn(it)
-            it.player.playSound(it.player.location, Sound.BLOCK_ANVIL_USE, 10.toFloat(), 1.toFloat())
-            it.player.sendTitle("", "&e&lThe Game has Begun".colored(), 0, 60, 20)
+            it.player.playSound(it.player.location, Sound.BLOCK_ANVIL_USE, 10f, 1f)
         }
+
+        object : BukkitRunnable() {
+            override fun run() {
+                invinciblePlayers = false
+            }
+        }.runTaskLaterAsynchronously(plugin, 40)
+
+        plugin.gamePortalManager.update()
     }
 
     open fun onGameEnd(winner: GamePlayer? = null) {
         status = GameStatus.ENDED
-        if (winner != null) {
-            sendMessage("&fPlayer ${winner.player.name} is the winner!")
-        }
 
         var playersCount = players.size
         while (playersCount > 0) {
@@ -256,6 +264,10 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         players.forEach {
             it.player.sendMessage(message.colored())
         }
+    }
+
+    open fun isFull(): Boolean {
+        return players.size >= getMaximumPlayers()
     }
 
     open fun getChestLocations(): MutableList<Location> {
@@ -275,7 +287,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun getMinimumRequiredPlayers(): Int {
-        return 1
+        return 4
+    }
+
+    open fun getMaximumPlayers(): Int {
+        return 20
     }
 
     open fun getRespawnCooldown(): Int {
@@ -283,7 +299,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun getStartCountdown(): Int {
-        return 25
+        return 90
     }
 
     open fun getEndCountdown(): Int {

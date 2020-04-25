@@ -4,7 +4,6 @@ import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.xoreboardutil.bukkit.XoreBoardUtil
-import org.bukkit.Bukkit
 
 open class GameBoard(val plugin: Gamesys, val game: Game) {
     private val board = XoreBoardUtil.getNextXoreBoard()
@@ -28,8 +27,8 @@ open class GameBoard(val plugin: Gamesys, val game: Game) {
     }
 
     open fun update() {
-        //TODO: Limit to 15 lines
         val lines = getLines()
+
         for (player in game.players) {
             val private = board.getPlayer(player.player).privateSidebar
             private.displayName = getTitle()

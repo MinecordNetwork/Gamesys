@@ -142,6 +142,11 @@ class WorldManager(private val plugin: Gamesys) {
         return editSession
     }
 
+    fun fixRespawnScreen() {
+        bukkitWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, false)
+        bukkitWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true)
+    }
+
     private fun loadWorld(): World {
         plugin.logger.logInfo("Loading world")
 

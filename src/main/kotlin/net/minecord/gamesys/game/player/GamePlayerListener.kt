@@ -2,26 +2,14 @@ package net.minecord.gamesys.game.player
 
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
-import net.minecord.gamesys.utils.colored
-import net.minecraft.server.v1_15_R1.EntityPlayer
-import net.minecraft.server.v1_15_R1.PacketPlayInClientCommand
-import net.minecraft.server.v1_15_R1.PacketPlayInClientCommand.EnumClientCommand
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
 import org.bukkit.attribute.Attribute
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftHumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.*
-import org.bukkit.event.player.PlayerDropItemEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerTeleportEvent
-import org.bukkit.scheduler.BukkitRunnable
-
+import org.bukkit.event.player.*
 
 class GamePlayerListener(private val plugin: Gamesys) : Listener {
     @EventHandler
@@ -67,6 +55,10 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         val victim = plugin.gamePlayerManager.get(e.entity as Player)
         val game = victim.game ?: return
 
+        if (game.invinciblePlayers) {
+            e.isCancelled = true
+        }
+
         if (game.status != GameStatus.RUNNING) {
             if (e.cause == EntityDamageEvent.DamageCause.VOID) {
                 victim.player.teleport(game.getLobbyLocation(victim).add(0.0, 0.5, 0.0))
@@ -76,16 +68,52 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
     }
 
     @EventHandler
+    fun playerRespawnEvent(e: PlayerRespawnEvent) {
+        val player = plugin.gamePlayerManager.get(e.player)
+
+        if (player.game?.status == GameStatus.RUNNING) {
+            e.respawnLocation = e.player.location
+        }
+    }
+
+    @EventHandler
+    fun onEntityDeath(e: EntityDeathEvent) {
+        if (e.entity !is Player) return
+
+        e.entity.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+    }
+
+    @EventHandler
     fun onPlayerDeath(e: PlayerDeathEvent) {
-        val player: GamePlayer = plugin.gamePlayerManager.get(e.entity)
-        player.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+        e.entity.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
         e.deathMessage = null
 
         if (!plugin.system.dropItemsAfterDeath()) {
             e.drops.clear()
         }
 
+        val player = plugin.gamePlayerManager.get(e.entity)
+
         player.game?.onPlayerDeath(player, null, player.lastAttacker)
+    }
+
+    @EventHandler
+    fun onChat(e: PlayerCommandPreprocessEvent) {
+        val player = plugin.gamePlayerManager.get(e.player)
+        val game = player.game
+
+        if (game != null) {
+            val cmd = e.message.split(" ")[0].replace("/", "")
+            val allowed = plugin.system.getAllowedCommands()
+            val blocked = plugin.system.getBlockedCommands()
+
+            if ((blocked.isNotEmpty() && blocked.contains(cmd)) || !allowed.contains(cmd)) {
+                e.player.sendMessage("If you want left the game, type /leave")
+                e.isCancelled = true
+            }
+
+            e.message
+        }
     }
 
     @EventHandler

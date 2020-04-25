@@ -78,7 +78,7 @@ class ArenaManager(private val plugin: Gamesys) {
                     plugin.worldManager.biggestArenaSize = size
                 }
 
-                arenas.add(plugin.system.createArena(file.name.replace(".schematic", ""), file, locations))
+                arenas.add(plugin.system.createArena(file.name.replace(".schem", ""), file, locations))
 
                 plugin.logger.logInfo("Schematic ${file.name} analyzed (${(System.currentTimeMillis() - now)}ms with ${locations["spawns"]?.size} spawns and ${locations["chests"]?.size} chests).")
                 analyzedArenas++

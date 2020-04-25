@@ -5,6 +5,7 @@ import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.Game
 import net.minecord.gamesys.game.board.GameBoard
 import net.minecord.gamesys.game.player.GamePlayer
+import net.minecord.gamesys.game.portal.GamePortal
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -20,11 +21,17 @@ interface System {
 
     fun createGameBoard(plugin: Gamesys, game: Game): GameBoard
 
+    fun createGamePortal(plugin: Gamesys, location: Location): GamePortal
+
+    fun getAllowedCommands(): MutableList<String>
+
+    fun getBlockedCommands(): MutableList<String>
+
     fun getArenaBlockMapping(): HashMap<String, Material>
 
     fun getSpawnLocation(): Location
 
-    fun getMinumumPreparedGamesCount(): Int
+    fun getMinimumPreparedGamesCount(): Int
 
     fun isItemThrowingAllowed(): Boolean
 

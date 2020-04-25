@@ -16,6 +16,7 @@ repositories {
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
     maven { url = 'https://maven.enginehub.org/repo/' }
+    maven { url = 'https://repo.codemc.io/repository/maven-public/' }
     flatDir {
         dirs 'libs'
     }
@@ -23,14 +24,15 @@ repositories {
 
 dependencies {
     implementation "org.spigotmc:spigot-api:$spigotVersion"
-    implementation "org.bukkit:spigot-server:1.15.2"
-    implementation group: 'org.spigotmc', name: 'plugin-annotations', version: '1.2.2-SNAPSHOT'
+    implementation 'org.bukkit:spigot-server:1.15.2'
+    implementation 'org.spigotmc:plugin-annotations:1.2.2-SNAPSHOT'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation 'com.sk89q.worldedit:worldedit-core:7.2.0-SNAPSHOT'
     implementation 'com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT'
     implementation 'com.boydti:fawe-core:1.15-654'
     implementation 'com.onarandombox:multiverse-core:4.1.1'
     implementation 'net.minecord:xoreboard-util:1.0'
+    implementation 'com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.0'
 }
 
 jar {
