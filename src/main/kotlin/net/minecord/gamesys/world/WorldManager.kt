@@ -49,12 +49,16 @@ class WorldManager(private val plugin: Gamesys) {
                         val gamePlayer = plugin.gamePlayerManager.get(player)
                         val game = gamePlayer.game
                         if (game != null) {
-                            if (game.status == GameStatus.RUNNING) {
-                                game.onPlayerDeath(gamePlayer, EntityDamageEvent.DamageCause.VOID)
-                            } else if (game.status == GameStatus.WAITING || game.status == GameStatus.STARTING) {
-                                player.teleport(game.getLobbyLocation(gamePlayer))
-                            } else {
-                                player.teleport(game.getRespawnLocation(gamePlayer))
+                            when (game.status) {
+                                GameStatus.RUNNING -> {
+                                    game.onPlayerDeath(gamePlayer, EntityDamageEvent.DamageCause.VOID)
+                                }
+                                GameStatus.WAITING, GameStatus.STARTING -> {
+                                    player.teleport(game.getLobbyLocation(gamePlayer))
+                                }
+                                else -> {
+                                    player.teleport(game.getRespawnLocation(gamePlayer))
+                                }
                             }
                         } else {
                             gamePlayer.player.teleport(plugin.system.getSpawnLocation())
