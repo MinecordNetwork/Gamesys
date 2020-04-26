@@ -3,6 +3,7 @@ package net.minecord.gamesys
 import net.minecord.gamesys.arena.ArenaManager
 import net.minecord.gamesys.command.JoinCommand
 import net.minecord.gamesys.command.LeaveCommand
+import net.minecord.gamesys.command.StartCommand
 import net.minecord.gamesys.config.ConfigReader
 import net.minecord.gamesys.game.GameManager
 import net.minecord.gamesys.game.player.GamePlayerListener
@@ -34,6 +35,7 @@ open class Gamesys: JavaPlugin() {
 
         getCommand("join")!!.setExecutor(JoinCommand(this))
         getCommand("leave")!!.setExecutor(LeaveCommand(this))
+        getCommand("start")!!.setExecutor(StartCommand(this))
 
         Bukkit.getPluginManager().registerEvents(GamePlayerListener(this), this)
     }

@@ -35,7 +35,7 @@ open class BaseSystem(val plugin: Gamesys) : System {
     }
 
     override fun getAllowedCommands(): MutableList<String> {
-        return mutableListOf("join", "leave", "server", "hub", "lobby")
+        return mutableListOf("join", "leave", "server", "hub", "lobby", "start")
     }
 
     override fun getBlockedCommands(): MutableList<String> {

@@ -85,6 +85,10 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun onPlayerDeath(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
+        if (player.status == GamePlayerStatus.SPECTATING || player.status == GamePlayerStatus.RESPAWNING) {
+            return
+        }
+
         player.deaths++
 
         if (killer != null) {
@@ -133,11 +137,12 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun onPlayerSpawn(player: GamePlayer) {
+        player.status = GamePlayerStatus.PLAYING
         player.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value!!
         player.player.foodLevel = 20
         player.player.gameMode = player.getDefaultGameMode()
         player.player.teleport(getRespawnLocation(player))
-        player.player.location.world?.playSound(player.player.location, Sound.ITEM_ARMOR_EQUIP_GENERIC, 10f, 1f)
+        player.player.location.world?.playSound(player.player.location, Sound.ITEM_ARMOR_EQUIP_TURTLE, 1.5f, 0.75f)
         player.player.inventory.clear()
         for ((slot, item) in player.getGameItems()) {
             player.player.inventory.setItem(slot, item)

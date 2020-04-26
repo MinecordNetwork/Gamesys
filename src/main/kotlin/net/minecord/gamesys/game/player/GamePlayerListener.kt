@@ -77,13 +77,6 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
     }
 
     @EventHandler
-    fun onEntityDeath(e: EntityDeathEvent) {
-        if (e.entity !is Player) return
-
-        e.entity.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
-    }
-
-    @EventHandler
     fun onPlayerDeath(e: PlayerDeathEvent) {
         e.entity.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
         e.deathMessage = null
