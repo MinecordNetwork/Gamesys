@@ -68,6 +68,10 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         }
         plugin.worldManager.fixRespawnScreen()
         plugin.gamePortalManager.update()
+        sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &ajoined &7the game &f(${players.size}/${getMaximumPlayers()})")
+        if (status == GameStatus.WAITING) {
+            sendMessage("${plugin.system.getChatPrefix()} &7The game needs &f${getMinimumRequiredPlayers() - players.size} &7more players to start")
+        }
     }
 
     open fun onPlayerLeft(player: GamePlayer) {
@@ -82,6 +86,9 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.player.teleport(plugin.system.getSpawnLocation())
         player.restoreInventory()
         plugin.gamePortalManager.update()
+        if (status != GameStatus.ENDING && status != GameStatus.ENDED) {
+            sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &cleft &7the game &f(${players.size}/${getMaximumPlayers()})")
+        }
     }
 
     open fun onPlayerDeath(player: GamePlayer, cause: EntityDamageEvent.DamageCause? = null, killer: GamePlayer? = null) {
@@ -192,6 +199,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onEndCountdownStart(winner: GamePlayer? = null) {
         status = GameStatus.ENDING
         var countdown = getEndCountdown()
+
+        if (winner != null) {
+            Bukkit.broadcastMessage("${plugin.system.getChatPrefix()} &7Player &e${winner.player.name} &7won the game in arena &b${arena.name}".colored())
+        }
+
         object : BukkitRunnable() {
             override fun run() {
                 when {

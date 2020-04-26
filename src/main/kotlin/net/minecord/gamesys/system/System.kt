@@ -31,6 +31,8 @@ interface System {
 
     fun getSpawnLocation(): Location
 
+    fun getChatPrefix(): String
+
     fun getMinimumPreparedGamesCount(): Int
 
     fun isItemThrowingAllowed(): Boolean

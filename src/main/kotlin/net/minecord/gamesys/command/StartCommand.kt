@@ -2,6 +2,7 @@ package net.minecord.gamesys.command
 
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.utils.colored
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -20,7 +21,7 @@ class StartCommand(private val plugin: Gamesys) : CommandExecutor {
                         game.onGameStart()
                     }
                     else -> {
-                        commandSender.sendMessage("Game is already running")
+                        commandSender.sendMessage("${plugin.system.getChatPrefix()} &cYour game is already running".colored())
                     }
                 }
             }

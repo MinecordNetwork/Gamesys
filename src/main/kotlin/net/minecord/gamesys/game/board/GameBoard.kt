@@ -8,11 +8,11 @@ import net.minecord.xoreboardutil.bukkit.XoreBoardUtil
 open class GameBoard(val plugin: Gamesys, val game: Game) {
     private val board = XoreBoardUtil.getNextXoreBoard()
 
-    open fun getTitle(): String {
+    open fun getTitle(player: GamePlayer): String {
         return "The Title"
     }
 
-    open fun getLines(): HashMap<String, Int> {
+    open fun getLines(player: GamePlayer): HashMap<String, Int> {
         return hashMapOf()
     }
 
@@ -27,12 +27,13 @@ open class GameBoard(val plugin: Gamesys, val game: Game) {
     }
 
     open fun update() {
-        val lines = getLines()
-
-        for (player in game.players) {
+        var playersCount = game.players.size
+        while (playersCount > 0) {
+            playersCount--
+            val player = game.players[playersCount]
             val private = board.getPlayer(player.player).privateSidebar
-            private.displayName = getTitle()
-            private.rewriteLines(lines)
+            private.displayName = getTitle(player)
+            private.rewriteLines(getLines(player))
             private.showSidebar()
         }
     }

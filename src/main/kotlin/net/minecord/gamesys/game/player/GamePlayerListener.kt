@@ -2,6 +2,7 @@ package net.minecord.gamesys.game.player
 
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.utils.colored
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
@@ -99,7 +100,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
                     return
                 }
 
-                e.player.sendMessage("If you want left the game, type /leave")
+                e.player.sendMessage("${plugin.system.getChatPrefix()} &7This command is disabled, if you want to leave, type &c/leave".colored())
                 e.isCancelled = true
             }
         }
