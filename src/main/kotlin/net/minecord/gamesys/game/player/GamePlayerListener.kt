@@ -55,14 +55,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         val victim = plugin.gamePlayerManager.get(e.entity as Player)
         val game = victim.game ?: return
 
-        if (game.invinciblePlayers) {
-            e.isCancelled = true
-        }
-
-        if (game.status != GameStatus.RUNNING) {
-            if (e.cause == EntityDamageEvent.DamageCause.VOID) {
-                victim.player.teleport(game.getLobbyLocation(victim).add(0.0, 0.5, 0.0))
-            }
+        if (game.invinciblePlayers || game.status != GameStatus.RUNNING) {
             e.isCancelled = true
         }
     }

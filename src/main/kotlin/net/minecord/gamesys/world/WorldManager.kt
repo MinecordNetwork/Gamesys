@@ -16,7 +16,11 @@ import com.sk89q.worldedit.session.ClipboardHolder
 import com.sk89q.worldedit.world.block.BlockTypes
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
+import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.game.player.GamePlayer
 import org.bukkit.*
+import org.bukkit.entity.Player
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import java.io.File
@@ -37,6 +41,28 @@ class WorldManager(private val plugin: Gamesys) {
     fun enable() {
         loadWorld()
         analyzeLobby()
+
+        object : BukkitRunnable() {
+            override fun run() {
+                for (player: Player in Bukkit.getOnlinePlayers()) {
+                    if (player.location.blockY <= 0) {
+                        val gamePlayer = plugin.gamePlayerManager.get(player)
+                        val game = gamePlayer.game
+                        if (game != null) {
+                            if (game.status == GameStatus.RUNNING) {
+                                game.onPlayerDeath(gamePlayer, EntityDamageEvent.DamageCause.VOID)
+                            } else if (game.status == GameStatus.WAITING || game.status == GameStatus.STARTING) {
+                                player.teleport(game.getLobbyLocation(gamePlayer))
+                            } else {
+                                player.teleport(game.getRespawnLocation(gamePlayer))
+                            }
+                        } else {
+                            gamePlayer.player.teleport(plugin.system.getSpawnLocation())
+                        }
+                    }
+                }
+            }
+        }.runTaskTimerAsynchronously(plugin, 0, 10)
     }
 
     private fun analyzeLobby() {
