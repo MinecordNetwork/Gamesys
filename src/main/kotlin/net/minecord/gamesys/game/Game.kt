@@ -142,7 +142,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.player.foodLevel = 20
         player.player.gameMode = player.getDefaultGameMode()
         player.player.teleport(getRespawnLocation(player))
-        player.player.location.world?.playSound(player.player.location, Sound.ITEM_ARMOR_EQUIP_TURTLE, 1.5f, 0.75f)
+        player.player.location.world?.playSound(player.player.location, Sound.ITEM_ARMOR_EQUIP_TURTLE, 2f, 1.25f)
         player.player.inventory.clear()
         for ((slot, item) in player.getGameItems()) {
             player.player.inventory.setItem(slot, item)
@@ -284,11 +284,11 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun getRespawnLocation(gamePlayer: GamePlayer): Location {
-        return getSpawnLocations().random().clone().add(0.0, 0.01, 0.0)
+        return getSpawnLocations().random()
     }
 
     open fun getLobbyLocation(gamePlayer: GamePlayer): Location {
-        return lobbyLocation.clone().add(0.0, 0.01, 0.0)
+        return lobbyLocation
     }
 
     open fun getMinimumRequiredPlayers(): Int {

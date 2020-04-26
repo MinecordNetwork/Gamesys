@@ -56,6 +56,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         val game = victim.game ?: return
 
         if (game.invinciblePlayers || game.status != GameStatus.RUNNING) {
+            victim.player.fireTicks = 0
             e.isCancelled = true
         }
     }
@@ -94,11 +95,13 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
             val blocked = plugin.system.getBlockedCommands()
 
             if ((blocked.isNotEmpty() && blocked.contains(cmd)) || !allowed.contains(cmd)) {
+                if (e.player.hasPermission("gamesys.admin.allow-commands") || e.player.hasPermission("${plugin.name.toLowerCase()}}.admin.allow-commands")) {
+                    return
+                }
+
                 e.player.sendMessage("If you want left the game, type /leave")
                 e.isCancelled = true
             }
-
-            e.message
         }
     }
 

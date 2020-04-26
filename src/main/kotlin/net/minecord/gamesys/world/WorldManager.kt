@@ -46,23 +46,27 @@ class WorldManager(private val plugin: Gamesys) {
             override fun run() {
                 for (player: Player in Bukkit.getOnlinePlayers()) {
                     if (player.location.blockY <= 0) {
-                        val gamePlayer = plugin.gamePlayerManager.get(player)
-                        val game = gamePlayer.game
-                        if (game != null) {
-                            when (game.status) {
-                                GameStatus.RUNNING -> {
-                                    game.onPlayerDeath(gamePlayer, EntityDamageEvent.DamageCause.VOID)
-                                }
-                                GameStatus.WAITING, GameStatus.STARTING -> {
-                                    player.teleport(game.getLobbyLocation(gamePlayer))
-                                }
-                                else -> {
-                                    player.teleport(game.getRespawnLocation(gamePlayer))
+                        object : BukkitRunnable() {
+                            override fun run() {
+                                val gamePlayer = plugin.gamePlayerManager.get(player)
+                                val game = gamePlayer.game
+                                if (game != null) {
+                                    when (game.status) {
+                                        GameStatus.RUNNING -> {
+                                            game.onPlayerDeath(gamePlayer, EntityDamageEvent.DamageCause.VOID)
+                                        }
+                                        GameStatus.WAITING, GameStatus.STARTING -> {
+                                            player.teleport(game.getLobbyLocation(gamePlayer))
+                                        }
+                                        else -> {
+                                            player.teleport(game.getRespawnLocation(gamePlayer))
+                                        }
+                                    }
+                                } else {
+                                    gamePlayer.player.teleport(plugin.system.getSpawnLocation())
                                 }
                             }
-                        } else {
-                            gamePlayer.player.teleport(plugin.system.getSpawnLocation())
-                        }
+                        }.runTask(plugin)
                     }
                 }
             }

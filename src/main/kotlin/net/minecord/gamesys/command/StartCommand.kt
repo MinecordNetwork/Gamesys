@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender
 
 class StartCommand(private val plugin: Gamesys) : CommandExecutor {
     override fun onCommand(commandSender: CommandSender, command: Command, s: String, strings: Array<String>): Boolean {
-        if (commandSender.hasPermission("gamesys.start")) {
+        if (commandSender.hasPermission("gamesys.admin.start") || commandSender.hasPermission("${plugin.name.toLowerCase()}}.admin.start")) {
             val game = plugin.gameManager.getSuitableGame()
 
             if (game != null) {
@@ -17,7 +17,7 @@ class StartCommand(private val plugin: Gamesys) : CommandExecutor {
                         game.startCountdownCounter = 10
                     }
                     GameStatus.WAITING -> {
-                        game.onStartCountdownStart()
+                        game.onGameStart()
                     }
                     else -> {
                         commandSender.sendMessage("Game is already running")
