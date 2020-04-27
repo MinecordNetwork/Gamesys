@@ -14,6 +14,7 @@ import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.craftbukkit.v1_15_R1.boss.CraftBossBar
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.random.Random
 import kotlin.math.atan2 as atan21
@@ -133,6 +134,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                     object : BukkitRunnable() {
                         override fun run() {
                             onPlayerSpawn(player)
+                            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player.player, player.player.location, false))
                         }
                     }.runTask(plugin)
                     cancel()
