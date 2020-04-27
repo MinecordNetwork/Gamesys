@@ -25,7 +25,7 @@ open class Gamesys: JavaPlugin() {
     val configReader: ConfigReader = ConfigReader(this)
     lateinit var system: System
 
-    fun run(factory: System) {
+    fun enable(factory: System) {
         system = factory
 
         gamePlayerManager.enable()
@@ -40,7 +40,7 @@ open class Gamesys: JavaPlugin() {
         Bukkit.getPluginManager().registerEvents(GamePlayerListener(this), this)
     }
 
-    fun stop() {
+    override fun onDisable() {
         gamePortalManager.disable()
         gameManager.disable()
         gamePlayerManager.disable()
