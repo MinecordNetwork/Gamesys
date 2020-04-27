@@ -8,11 +8,10 @@ import net.minecord.gamesys.Gamesys
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import java.io.File
-import java.io.IOException
 
 class ArenaManager(private val plugin: Gamesys) {
     val arenas = arrayListOf<Arena>()
-    var analyzedArenas = 0
+    var validSchematicCount = 0
 
     fun enable() {
         loadArenas()
@@ -29,22 +28,11 @@ class ArenaManager(private val plugin: Gamesys) {
 
         val schematics: Array<File> = schematicsDirectory.listFiles() ?: return
         val mapping = getBlockMapping()
+        val validSchematics = schematics.filter { it.endsWith(".schem") && it.isFile }
+        validSchematicCount = validSchematics.size
 
-        for (schematic in schematics) {
-            if (!schematic.name.endsWith(".schem")) {
-                continue
-            }
-
-            if (!schematic.isFile) {
-                plugin.logger.logWarning("Could not load schematic " + schematic.name + ": Not a file")
-                continue
-            }
-
-            try {
-                analyzeArena(schematic, mapping)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+        for (schematic in validSchematics) {
+            analyzeArena(schematic, mapping)
         }
     }
 
@@ -81,9 +69,8 @@ class ArenaManager(private val plugin: Gamesys) {
                 arenas.add(plugin.system.createArena(file.name.replace(".schem", ""), file, locations))
 
                 plugin.logger.logInfo("Schematic ${file.name} analyzed (${(System.currentTimeMillis() - now)}ms with ${locations["spawns"]?.size} spawns and ${locations["chests"]?.size} chests).")
-                analyzedArenas++
 
-                if (analyzedArenas == arenas.size) {
+                if (arenas.size == validSchematicCount) {
                     plugin.gameManager.enable()
                 }
             }
