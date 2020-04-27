@@ -17,7 +17,6 @@ import com.sk89q.worldedit.world.block.BlockTypes
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
 import net.minecord.gamesys.game.GameStatus
-import net.minecord.gamesys.game.player.GamePlayer
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
@@ -152,6 +151,12 @@ class WorldManager(private val plugin: Gamesys) {
                     editSession.setBlock(BlockVector3.at(it.blockX, it.blockY, it.blockZ), BlockTypes.AIR?.defaultState)
                 }
                 editSession.close()
+
+                object : BukkitRunnable() {
+                    override fun run() {
+                        for (chunk in bukkitWorld.loadedChunks) chunk.unload()
+                    }
+                }.runTask(plugin)
 
                 plugin.logger.logInfo("Arena ${game.arena.name} pasted at ${arenaOrigin.blockX} ${arenaOrigin.blockY} ${arenaOrigin.blockZ} (${(System.currentTimeMillis() - now)}ms)")
 
