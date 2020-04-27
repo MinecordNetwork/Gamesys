@@ -28,7 +28,7 @@ class ArenaManager(private val plugin: Gamesys) {
 
         val schematics: Array<File> = schematicsDirectory.listFiles() ?: return
         val mapping = getBlockMapping()
-        val validSchematics = schematics.filter { it.endsWith(".schem") && it.isFile }
+        val validSchematics = schematics.filter { it.name.endsWith(".schem") && it.isFile }
         validSchematicCount = validSchematics.size
 
         for (schematic in validSchematics) {
