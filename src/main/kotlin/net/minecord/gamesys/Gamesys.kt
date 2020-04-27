@@ -16,17 +16,17 @@ import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 open class Gamesys: JavaPlugin() {
-    val arenaManager: ArenaManager = ArenaManager(this)
-    val gameManager: GameManager = GameManager(this)
-    val gamePlayerManager: GamePlayerManager = GamePlayerManager(this)
-    val gamePortalManager: GamePortalManager = GamePortalManager(this)
-    val worldManager: WorldManager = WorldManager(this)
-    val logger: Logger = Logger(this)
-    val configReader: ConfigReader = ConfigReader(this)
+    val arenaManager: ArenaManager by lazy { ArenaManager(this) }
+    val gameManager: GameManager by lazy { GameManager(this) }
+    val gamePlayerManager: GamePlayerManager by lazy { GamePlayerManager(this) }
+    val gamePortalManager: GamePortalManager by lazy { GamePortalManager(this) }
+    val worldManager: WorldManager by lazy { WorldManager(this) }
+    val logger: Logger by lazy { Logger(this) }
+    val configReader: ConfigReader by lazy { ConfigReader(this) }
     lateinit var system: System
 
-    fun enable(factory: System) {
-        system = factory
+    fun enable(customSystem: System) {
+        system = customSystem
 
         gamePlayerManager.enable()
         arenaManager.enable()
