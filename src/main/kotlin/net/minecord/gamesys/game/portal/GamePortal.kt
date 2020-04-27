@@ -44,25 +44,27 @@ open class GamePortal(val plugin: Gamesys, val location: Location) {
     }
 
     open fun updateHologram() {
-        object : BukkitRunnable() {
-            override fun run() {
-                hologram.clearLines()
+        if (plugin.isEnabled) {
+            object : BukkitRunnable() {
+                override fun run() {
+                    hologram.clearLines()
 
-                val game = plugin.gameManager.getSuitableGame()
+                    val game = plugin.gameManager.getSuitableGame()
 
-                if (game == null) {
-                    hologram.insertTextLine(0, "&c&lNo game available".colored())
-                } else {
-                    hologram.insertTextLine(0, "&b&l${game.arena.name}".colored())
-                    hologram.insertTextLine(1, "&f&l${game.players.size} / ${game.getMaximumPlayers()}".colored())
-                    if (game.status == GameStatus.WAITING) {
-                        hologram.insertTextLine(2, "&e&lWaiting for players".colored())
+                    if (game == null) {
+                        hologram.insertTextLine(0, "&c&lNo game available".colored())
                     } else {
-                        hologram.insertTextLine(2, "&f&lStarting in &a&l${game.startCountdownCounter}".colored())
+                        hologram.insertTextLine(0, "&b&l${game.arena.name}".colored())
+                        hologram.insertTextLine(1, "&f&l${game.players.size} / ${game.getMaximumPlayers()}".colored())
+                        if (game.status == GameStatus.WAITING) {
+                            hologram.insertTextLine(2, "&e&lWaiting for players".colored())
+                        } else {
+                            hologram.insertTextLine(2, "&f&lStarting in &a&l${game.startCountdownCounter}".colored())
+                        }
                     }
                 }
-            }
-        }.runTask(plugin)
+            }.runTask(plugin)
+        }
     }
 
     fun removeHologram() {
