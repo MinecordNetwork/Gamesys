@@ -15,8 +15,8 @@ import org.bukkit.util.Vector
 import java.io.File
 
 open class BaseSystem(val plugin: Gamesys) : System {
-    override fun createArena(name: String, file: File, locations: HashMap<String, ArrayList<Vector>>, minPlayers: Int?, maxPlayers: Int?): Arena {
-        return Arena(name, file, locations, minPlayers, maxPlayers)
+    override fun createArena(name: String, file: File, locations: HashMap<String, ArrayList<Vector>>): Arena {
+        return Arena(name, file, locations)
     }
 
     override fun createGame(plugin: Gamesys, arena: Arena): Game {

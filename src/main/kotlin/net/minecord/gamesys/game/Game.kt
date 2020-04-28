@@ -64,14 +64,14 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.player.gameMode = player.getLobbyGameMode()
         player.player.teleport(getLobbyLocation(player))
         player.storeAndClearInventory()
-        if (status == GameStatus.WAITING && players.size >= getMinimumRequiredPlayers()) {
+        if (status == GameStatus.WAITING && players.size >= getMinimumPlayers()) {
             onStartCountdownStart()
         }
         plugin.worldManager.fixRespawnScreen()
         plugin.gamePortalManager.update()
         sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &ajoined &7the game &f(${players.size}/${getMaximumPlayers()})")
         if (status == GameStatus.WAITING) {
-            sendMessage("${plugin.system.getChatPrefix()} &7The game needs &f${getMinimumRequiredPlayers() - players.size} &7more players to start")
+            sendMessage("${plugin.system.getChatPrefix()} &7The game needs &f${getMinimumPlayers() - players.size} &7more players to start")
         }
     }
 
@@ -168,7 +168,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         startCountdownCounter = getStartCountdown()
         object : BukkitRunnable() {
             override fun run() {
-                if (players.size < getMinimumRequiredPlayers()) {
+                if (players.size < getMinimumPlayers()) {
                     onStartWaiting()
                     cancel()
                     return
@@ -305,7 +305,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         return lobbyLocation
     }
 
-    open fun getMinimumRequiredPlayers(): Int {
+    open fun getMinimumPlayers(): Int {
         return 4
     }
 
