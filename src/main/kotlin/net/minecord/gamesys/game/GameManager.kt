@@ -9,7 +9,7 @@ class GameManager(val plugin: Gamesys) {
     fun enable() {
         object : BukkitRunnable() {
             override fun run() {
-                if (getAvailableGames().size < plugin.system.getMinimumPreparedGamesCount()) {
+                if (getAvailableGames().filter { it.status != GameStatus.STARTING }.size < plugin.system.getMinimumPreparedGamesCount()) {
                     addGame()
                 }
             }
