@@ -55,7 +55,7 @@ open class GamePortal(val plugin: Gamesys, val location: Location) {
                         hologram.insertTextLine(0, "&c&lNo game available".colored())
                     } else {
                         hologram.insertTextLine(0, "&b&l${game.arena.name}".colored())
-                        hologram.insertTextLine(1, "&f&l${game.players.size} / ${game.getMaximumPlayers()}".colored())
+                        hologram.insertTextLine(1, "&f&l${game.players.size}/${game.getMaximumPlayers()}".colored())
                         if (game.status == GameStatus.WAITING) {
                             hologram.insertTextLine(2, "&e&lWaiting for players".colored())
                         } else {
