@@ -89,7 +89,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         val player = plugin.gamePlayerManager.get(e.entity)
         val version = ProtocolSupport.getProtocolVersion(player.player)
 
-        if (version <= 47) { //1.8 version respawn fix
+        if (version in 0..47) { //1.8 version respawn fix
             object : BukkitRunnable() {
                 override fun run() {
                     player.player.spigot().respawn()
