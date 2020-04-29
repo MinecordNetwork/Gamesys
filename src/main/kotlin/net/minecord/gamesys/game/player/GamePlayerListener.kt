@@ -2,15 +2,22 @@ package net.minecord.gamesys.game.player
 
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.utils.ProtocolSupport
 import net.minecord.gamesys.utils.colored
+import org.bukkit.Bukkit
 import org.bukkit.attribute.Attribute
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.*
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.FoodLevelChangeEvent
+import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
+import org.bukkit.scheduler.BukkitRunnable
 
 class GamePlayerListener(private val plugin: Gamesys) : Listener {
     @EventHandler
@@ -62,7 +69,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     fun playerRespawnEvent(e: PlayerRespawnEvent) {
         val player = plugin.gamePlayerManager.get(e.player)
 
@@ -73,7 +80,6 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
 
     @EventHandler
     fun onPlayerDeath(e: PlayerDeathEvent) {
-        e.entity.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
         e.deathMessage = null
 
         if (!plugin.system.dropItemsAfterDeath()) {
@@ -81,6 +87,18 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         }
 
         val player = plugin.gamePlayerManager.get(e.entity)
+        val version = ProtocolSupport.getProtocolVersion(player.player)
+
+        if (version <= 47) { //1.8 version respawn fix
+            object : BukkitRunnable() {
+                override fun run() {
+                    player.player.spigot().respawn()
+                }
+            }.runTaskLater(plugin, 1)
+
+        } else {
+            player.player.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+        }
 
         player.game?.onPlayerDeath(player, null, player.lastAttacker)
     }
