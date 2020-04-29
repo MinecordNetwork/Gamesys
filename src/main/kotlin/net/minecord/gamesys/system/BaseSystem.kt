@@ -3,10 +3,9 @@ package net.minecord.gamesys.system
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.Game
-import net.minecord.gamesys.game.board.GameBoard
+import net.minecord.gamesys.game.sidebar.GameSidebar
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.portal.GamePortal
-import net.minecord.gamesys.utils.colored
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -27,8 +26,8 @@ open class BaseSystem(val plugin: Gamesys) : System {
         return GamePlayer(plugin, player)
     }
 
-    override fun createGameBoard(plugin: Gamesys, game: Game): GameBoard {
-        return GameBoard(plugin, game)
+    override fun createGameSidebar(plugin: Gamesys, game: Game): GameSidebar {
+        return GameSidebar(plugin, game)
     }
 
     override fun createGamePortal(plugin: Gamesys, location: Location): GamePortal {

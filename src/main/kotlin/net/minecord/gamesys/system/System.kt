@@ -3,7 +3,7 @@ package net.minecord.gamesys.system
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.Game
-import net.minecord.gamesys.game.board.GameBoard
+import net.minecord.gamesys.game.sidebar.GameSidebar
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.portal.GamePortal
 import org.bukkit.Location
@@ -19,7 +19,7 @@ interface System {
 
     fun createGamePlayer(plugin: Gamesys, player: Player): GamePlayer
 
-    fun createGameBoard(plugin: Gamesys, game: Game): GameBoard
+    fun createGameSidebar(plugin: Gamesys, game: Game): GameSidebar
 
     fun createGamePortal(plugin: Gamesys, location: Location): GamePortal
 

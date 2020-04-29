@@ -26,7 +26,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     var invinciblePlayers = true
     protected val locations = hashMapOf<String, MutableList<Location>>()
     protected val bar: CraftBossBar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
-    protected val board = plugin.system.createGameBoard(plugin, this)
+    protected val sidebar = plugin.system.createGameSidebar(plugin, this)
     lateinit var lobbyLocation: Location
 
     init {
@@ -57,7 +57,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onPlayerJoined(player: GamePlayer) {
         players.add(player)
         bar.addPlayer(player.player)
-        board.addPlayer(player)
+        sidebar.addPlayer(player)
         player.game = this
         player.status = GamePlayerStatus.PLAYING
         player.player.allowFlight = false
@@ -78,7 +78,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     open fun onPlayerLeft(player: GamePlayer) {
         players.remove(player)
         bar.removePlayer(player.player)
-        board.removePlayer(player)
+        sidebar.removePlayer(player)
         player.kills = 0
         player.deaths = 0
         player.game = null
