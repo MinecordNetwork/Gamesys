@@ -83,6 +83,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
         player.deaths = 0
         player.game = null
         player.status = GamePlayerStatus.NONE
+        player.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
         player.player.gameMode = player.getLobbyGameMode()
         player.player.teleport(plugin.system.getSpawnLocation())
         player.restoreInventory()
