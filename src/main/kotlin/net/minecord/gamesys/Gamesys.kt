@@ -10,6 +10,7 @@ import net.minecord.gamesys.game.player.GamePlayerListener
 import net.minecord.gamesys.game.player.GamePlayerManager
 import net.minecord.gamesys.game.portal.GamePortalManager
 import net.minecord.gamesys.logging.Logger
+import net.minecord.gamesys.system.BaseSystem
 import net.minecord.gamesys.system.System
 import net.minecord.gamesys.world.WorldManager
 import org.bukkit.Bukkit
@@ -23,11 +24,9 @@ open class Gamesys: JavaPlugin() {
     val worldManager: WorldManager by lazy { WorldManager(this) }
     val logger: Logger by lazy { Logger(this) }
     val configReader: ConfigReader by lazy { ConfigReader(this) }
-    lateinit var system: System
+    open val system: System by lazy { BaseSystem(this) }
 
-    fun enable(customSystem: System) {
-        system = customSystem
-
+    override fun onEnable() {
         gamePlayerManager.enable()
         arenaManager.enable()
         worldManager.enable()

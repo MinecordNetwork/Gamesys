@@ -21,7 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable
 import kotlin.random.Random
 import kotlin.math.atan2 as atan21
 
-open class Game(val plugin: Gamesys, val arena: Arena) {
+open class Game(open val plugin: Gamesys, open val arena: Arena) {
     val players = mutableListOf<GamePlayer>()
     var status: GameStatus = GameStatus.PREPARING
     var startCountdownCounter = 0
