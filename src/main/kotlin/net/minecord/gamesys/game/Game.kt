@@ -6,10 +6,7 @@ import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
-import net.minecord.gamesys.utils.colored
-import net.minecord.gamesys.utils.instantFirework
-import net.minecord.gamesys.utils.runTask
-import net.minecord.gamesys.utils.runTaskLaterAsynchronously
+import net.minecord.gamesys.utils.*
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.boss.BarColor
@@ -251,7 +248,9 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
             it.player.playSound(it.player.location, Sound.BLOCK_ANVIL_USE, 10f, 1f)
         }
 
-        plugin.runTaskLaterAsynchronously({ invinciblePlayers = false }, 40)
+        plugin.runTaskLaterAsynchronously({
+            invinciblePlayers = false
+        }, 40)
 
         plugin.gamePortalManager.update()
     }
