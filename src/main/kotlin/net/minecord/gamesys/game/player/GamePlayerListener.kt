@@ -4,6 +4,7 @@ import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
 import net.minecord.gamesys.utils.ProtocolSupport
 import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.runTaskLater
 import org.bukkit.Bukkit
 import org.bukkit.attribute.Attribute
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer
@@ -90,11 +91,9 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         val version = ProtocolSupport.getProtocolVersion(player.player)
 
         if (version in 0..47) { //1.8 version respawn fix
-            object : BukkitRunnable() {
-                override fun run() {
-                    player.player.spigot().respawn()
-                }
-            }.runTaskLater(plugin, 1)
+            plugin.runTaskLater({
+                player.player.spigot().respawn()
+            }, 1)
 
         } else {
             player.player.health = e.entity.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value

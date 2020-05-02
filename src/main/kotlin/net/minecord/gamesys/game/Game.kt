@@ -8,6 +8,8 @@ import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
 import net.minecord.gamesys.utils.colored
 import net.minecord.gamesys.utils.instantFirework
+import net.minecord.gamesys.utils.runTask
+import net.minecord.gamesys.utils.runTaskLaterAsynchronously
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.boss.BarColor
@@ -132,12 +134,10 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             var counter = getRespawnCooldown()
             override fun run() {
                 if (counter <= 0) {
-                    object : BukkitRunnable() {
-                        override fun run() {
-                            onPlayerSpawn(player)
-                            Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player.player, player.player.location, false))
-                        }
-                    }.runTask(plugin)
+                    plugin.runTask {
+                        onPlayerSpawn(player)
+                        Bukkit.getPluginManager().callEvent(PlayerRespawnEvent(player.player, player.player.location, false))
+                    }
                     cancel()
                     return
                 }
@@ -176,11 +176,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                 }
                 when {
                     startCountdownCounter <= 0 -> {
-                        object : BukkitRunnable() {
-                            override fun run() {
-                                onGameStart()
-                            }
-                        }.runTask(plugin)
+                        plugin.runTask { onGameStart() }
                         cancel()
                         return
                     }
@@ -192,7 +188,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
                     }
                 }
                 bar.setTitle("&f&lGame starts in &e&l$startCountdownCounter &f&lseconds".colored())
-                bar.progress = (startCountdownCounter / getStartCountdown()).toDouble()
+                bar.progress = startCountdownCounter.toDouble() / getStartCountdown().toDouble()
                 plugin.gamePortalManager.update()
                 startCountdownCounter--
             }
@@ -211,11 +207,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             override fun run() {
                 when {
                     countdown <= 0 -> {
-                        object : BukkitRunnable() {
-                            override fun run() {
-                                onGameEnd(winner)
-                            }
-                        }.runTask(plugin)
+                        plugin.runTask { onGameEnd(winner) }
                         cancel()
                         return
                     }
@@ -259,11 +251,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
             it.player.playSound(it.player.location, Sound.BLOCK_ANVIL_USE, 10f, 1f)
         }
 
-        object : BukkitRunnable() {
-            override fun run() {
-                invinciblePlayers = false
-            }
-        }.runTaskLaterAsynchronously(plugin, 40)
+        plugin.runTaskLaterAsynchronously({ invinciblePlayers = false }, 40)
 
         plugin.gamePortalManager.update()
     }
@@ -281,9 +269,7 @@ open class Game(val plugin: Gamesys, val arena: Arena) {
     }
 
     open fun sendMessage(message: String) {
-        players.forEach {
-            it.player.sendMessage(message.colored())
-        }
+        players.forEach { it.player.sendMessage(message.colored()) }
     }
 
     open fun isFull(): Boolean {

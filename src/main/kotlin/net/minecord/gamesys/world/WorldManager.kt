@@ -17,6 +17,8 @@ import com.sk89q.worldedit.world.block.BlockTypes
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
 import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.utils.runTaskAsynchronously
+import net.minecord.gamesys.utils.runTaskLaterAsynchronously
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
@@ -73,41 +75,39 @@ class WorldManager(private val plugin: Gamesys) {
     }
 
     private fun analyzeLobby() {
-        object : BukkitRunnable() {
-            override fun run() {
-                plugin.logger.logInfo("Analyzing lobby schematic")
+        plugin.runTaskAsynchronously {
+            plugin.logger.logInfo("Analyzing lobby schematic")
 
-                if (!lobbyFile.exists()) {
-                    plugin.logger.logError("Lobby schematic does not exist")
-                    return
-                }
+            if (!lobbyFile.exists()) {
+                plugin.logger.logError("Lobby schematic does not exist")
+                return@runTaskAsynchronously
+            }
 
-                val now = System.currentTimeMillis()
-                val clipboard =
-                    ClipboardFormats.findByFile(lobbyFile)?.getReader(lobbyFile.inputStream())?.read() ?: return
+            val now = System.currentTimeMillis()
+            val clipboard =
+                ClipboardFormats.findByFile(lobbyFile)?.getReader(lobbyFile.inputStream())?.read() ?: return@runTaskAsynchronously
 
-                for (y in clipboard.minimumPoint.blockY..clipboard.maximumPoint.blockY) {
-                    for (x in clipboard.minimumPoint.blockX..clipboard.maximumPoint.blockX) {
-                        for (z in clipboard.minimumPoint.blockZ..clipboard.maximumPoint.blockZ) {
-                            val blockState = clipboard.getBlock(BlockVector3.at(x, y, z))
-                            if (blockState.blockType == BlockTypes.WHITE_GLAZED_TERRACOTTA) {
-                                lobbySpawnLocation = Vector(x, y, z).subtract(
-                                    Vector(
-                                        clipboard.origin.x,
-                                        clipboard.origin.y,
-                                        clipboard.origin.z
-                                    )
+            for (y in clipboard.minimumPoint.blockY..clipboard.maximumPoint.blockY) {
+                for (x in clipboard.minimumPoint.blockX..clipboard.maximumPoint.blockX) {
+                    for (z in clipboard.minimumPoint.blockZ..clipboard.maximumPoint.blockZ) {
+                        val blockState = clipboard.getBlock(BlockVector3.at(x, y, z))
+                        if (blockState.blockType == BlockTypes.WHITE_GLAZED_TERRACOTTA) {
+                            lobbySpawnLocation = Vector(x, y, z).subtract(
+                                Vector(
+                                    clipboard.origin.x,
+                                    clipboard.origin.y,
+                                    clipboard.origin.z
                                 )
-                                plugin.logger.logInfo("Lobby schematic analyzed in ${(System.currentTimeMillis() - now)}ms")
-                                return
-                            }
+                            )
+                            plugin.logger.logInfo("Lobby schematic analyzed in ${(System.currentTimeMillis() - now)}ms")
+                            return@runTaskAsynchronously
                         }
                     }
                 }
-
-                plugin.logger.logError("Lobby schematic does not have a spawn! (WHITE_GLAZED_TERRACOTTA)")
             }
-        }.runTaskAsynchronously(plugin)
+
+            plugin.logger.logError("Lobby schematic does not have a spawn! (WHITE_GLAZED_TERRACOTTA)")
+        }
     }
 
     fun loadGame(game: Game) {
@@ -250,13 +250,11 @@ class WorldManager(private val plugin: Gamesys) {
             }
         }
 
-        object : BukkitRunnable() {
-            override fun run() {
-                if (!backupRegion.exists()) {
-                    region.copyRecursively(backupRegion)
-                }
+        plugin.runTaskLaterAsynchronously({
+            if (!backupRegion.exists()) {
+                region.copyRecursively(backupRegion)
             }
-        }.runTaskLaterAsynchronously(plugin, 60)
+        }, 60)
 
         plugin.logger.logInfo("World $worldName loaded (${(System.currentTimeMillis() - now)}ms)")
 

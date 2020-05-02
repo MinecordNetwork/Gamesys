@@ -2,15 +2,13 @@ package net.minecord.gamesys.game.player
 
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.Game
+import net.minecord.gamesys.utils.runTaskLaterAsynchronously
 import org.bukkit.GameMode
-import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.scheduler.BukkitRunnable
 import kotlin.collections.HashMap
 import kotlin.collections.hashMapOf
-
 
 open class GamePlayer(val plugin: Gamesys, val player: Player) {
     private var storedItems = arrayOf<ItemStack>()
@@ -26,12 +24,10 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
     open fun onAttack(lastAttacker: GamePlayer, damageCause: EntityDamageEvent.DamageCause) {
         this.lastAttacker = lastAttacker
         this.lastDamageCause = damageCause
-        object : BukkitRunnable() {
-            override fun run() {
-                if (this@GamePlayer.lastAttacker != null && this@GamePlayer.lastAttacker == lastAttacker) this@GamePlayer.lastAttacker = null
-                if (this@GamePlayer.lastDamageCause != null && this@GamePlayer.lastDamageCause == damageCause) this@GamePlayer.lastDamageCause = null
-            }
-        }.runTaskLaterAsynchronously(plugin, 100)
+        plugin.runTaskLaterAsynchronously({
+            if (this@GamePlayer.lastAttacker != null && this@GamePlayer.lastAttacker == lastAttacker) this@GamePlayer.lastAttacker = null
+            if (this@GamePlayer.lastDamageCause != null && this@GamePlayer.lastDamageCause == damageCause) this@GamePlayer.lastDamageCause = null
+        }, 100)
     }
 
     fun storeAndClearInventory() {
@@ -47,22 +43,6 @@ open class GamePlayer(val plugin: Gamesys, val player: Player) {
         player.inventory.contents = storedItems
         player.inventory.setArmorContents(storedArmorContents)
         player.inventory.setExtraContents(storedExtraContents)
-    }
-
-    fun teleport(location: Location) {
-        object : BukkitRunnable() {
-            override fun run() {
-                player.teleport(location)
-            }
-        }.runTask(plugin)
-    }
-
-    fun setGameMode(gameMode: GameMode) {
-        object : BukkitRunnable() {
-            override fun run() {
-                player.gameMode = gameMode
-            }
-        }.runTask(plugin)
     }
 
     open fun getGameItems(): HashMap<Int, ItemStack> {
