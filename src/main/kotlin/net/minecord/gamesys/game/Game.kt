@@ -6,7 +6,10 @@ import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
-import net.minecord.gamesys.utils.*
+import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.instantFirework
+import net.minecord.gamesys.utils.runTask
+import net.minecord.gamesys.utils.runTaskLaterAsynchronously
 import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.boss.BarColor
@@ -57,12 +60,15 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
         players.add(player)
         bar.addPlayer(player.player)
         sidebar.addPlayer(player)
-        player.game = this
-        player.status = GamePlayerStatus.PLAYING
-        player.player.allowFlight = false
-        player.player.gameMode = player.getLobbyGameMode()
-        player.player.teleport(getLobbyLocation(player))
-        player.storeAndClearInventory()
+        player.apply {
+            game = this@Game
+            status = GamePlayerStatus.PLAYING
+            storeAndClearInventory()
+            this.player.allowFlight = false
+            this.player.gameMode = player.getLobbyGameMode()
+            this.player.teleport(getLobbyLocation(player))
+            this.player.location.world?.playSound(this.player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f)
+        }
         if (status == GameStatus.WAITING && players.size >= getMinimumPlayers()) {
             onStartCountdownStart()
         }
@@ -78,14 +84,16 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
         players.remove(player)
         bar.removePlayer(player.player)
         sidebar.removePlayer(player)
-        player.kills = 0
-        player.deaths = 0
-        player.game = null
-        player.status = GamePlayerStatus.NONE
-        player.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
-        player.player.gameMode = player.getLobbyGameMode()
-        player.player.teleport(plugin.system.getSpawnLocation())
-        player.restoreInventory()
+        player.apply {
+            kills = 0
+            deaths = 0
+            game = null
+            status = GamePlayerStatus.NONE
+            this.player.health = player.player.getAttribute(Attribute.GENERIC_MAX_HEALTH)!!.value
+            this.player.gameMode = player.getLobbyGameMode()
+            this.player.teleport(plugin.system.getSpawnLocation())
+            this.restoreInventory()
+        }
         plugin.gamePortalManager.update()
         if (status != GameStatus.ENDING && status != GameStatus.ENDED) {
             sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &cleft &7the game &f(${players.size}/${getMaximumPlayers()})")
