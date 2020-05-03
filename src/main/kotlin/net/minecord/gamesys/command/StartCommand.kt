@@ -15,7 +15,9 @@ class StartCommand(private val plugin: Gamesys) : CommandExecutor {
             if (game != null) {
                 when (game.status) {
                     GameStatus.STARTING -> {
-                        game.startCountdownCounter = 10
+                        if (game.startCountdownCounter > 10) {
+                            game.startCountdownCounter = 10
+                        }
                     }
                     GameStatus.WAITING -> {
                         game.onGameStart()

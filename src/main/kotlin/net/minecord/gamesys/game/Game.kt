@@ -36,7 +36,6 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
     }
 
     open fun onArenaLoaded(editSession: EditSession, origin: Location, lobbyLocation: Location) {
-        status = GameStatus.WAITING
         for ((string, vectors) in arena.locations) {
             locations[string] = arrayListOf()
             vectors.forEach {
@@ -53,7 +52,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
             }
         }
         this.lobbyLocation = lobbyLocation
-        plugin.gamePortalManager.update()
+        onStartWaiting()
     }
 
     open fun onPlayerJoined(player: GamePlayer) {
@@ -69,7 +68,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
             this.player.teleport(getLobbyLocation(player))
             this.player.location.world?.playSound(this.player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f)
         }
-        if (status == GameStatus.WAITING && players.size >= getMinimumPlayers()) {
+        if (status == GameStatus.WAITING && (players.size >= getMinimumPlayersToStartCountdown() || (players.size == Bukkit.getOnlinePlayers().size && players.size >= getMinimumPlayers()))) {
             onStartCountdownStart()
         }
         plugin.worldManager.fixRespawnScreen()
@@ -167,6 +166,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
     open fun onStartWaiting() {
         status = GameStatus.WAITING
         bar.setTitle("&f&lWaiting for more players".colored())
+        plugin.gamePortalManager.update()
     }
 
     open fun onStartCountdownStart() {
@@ -195,7 +195,14 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
                 bar.setTitle("&f&lGame starts in &e&l$startCountdownCounter &f&lseconds".colored())
                 bar.progress = startCountdownCounter.toDouble() / getStartCountdown().toDouble()
                 plugin.gamePortalManager.update()
-                startCountdownCounter--
+
+                val cutCountdownFrom = 30
+                if (startCountdownCounter > cutCountdownFrom && players.size == Bukkit.getOnlinePlayers().size) {
+                    startCountdownCounter = cutCountdownFrom
+                    sendMessage("${plugin.system.getChatPrefix()} &7All players joined, countdown was set to &e$cutCountdownFrom")
+                } else {
+                    startCountdownCounter--
+                }
             }
         }.runTaskTimerAsynchronously(plugin, 0, 20)
     }
@@ -299,8 +306,12 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
         return lobbyLocation
     }
 
-    open fun getMinimumPlayers(): Int {
+    open fun getMinimumPlayersToStartCountdown(): Int {
         return 4
+    }
+
+    open fun getMinimumPlayers(): Int {
+        return 2
     }
 
     open fun getMaximumPlayers(): Int {
@@ -312,7 +323,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
     }
 
     open fun getStartCountdown(): Int {
-        return 90
+        return 60
     }
 
     open fun getEndCountdown(): Int {
