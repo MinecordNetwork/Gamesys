@@ -16,6 +16,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.*
 
 class GamePlayerListener(private val plugin: Gamesys) : Listener {
@@ -147,6 +148,16 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
 
             if (e.cause == EntityDamageEvent.DamageCause.FALL) {
                 e.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    fun onInventoryClick(e: InventoryClickEvent) {
+        if (!plugin.system.getProperty(SystemProperty.INVENTORY_MANIPULATION)) {
+            if (e.whoClicked is Player) {
+                val player = plugin.gamePlayerManager.get(e.whoClicked as Player)
+                if (player.game != null) e.isCancelled = true
             }
         }
     }

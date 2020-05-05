@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack
 import kotlin.collections.HashMap
 import kotlin.collections.hashMapOf
 
-open class GamePlayer(val plugin: Gamesys, val player: Player) {
+open class GamePlayer(open val plugin: Gamesys, val player: Player) {
     private var storedItems = arrayOf<ItemStack>()
     private var storedArmorContents = arrayOf<ItemStack>()
     private var storedExtraContents = arrayOf<ItemStack>()

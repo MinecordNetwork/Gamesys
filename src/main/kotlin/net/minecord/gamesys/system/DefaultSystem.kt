@@ -21,6 +21,7 @@ open class DefaultSystem(val plugin: Gamesys) : System {
         properties[SystemProperty.FALL_DAMAGE] = false
         properties[SystemProperty.ITEM_THROWING] = false
         properties[SystemProperty.DROP_ITEMS_AFTER_DEATH] = false
+        properties[SystemProperty.INVENTORY_MANIPULATION] = false
     }
 
     override fun createArena(name: String, file: File, locations: HashMap<String, ArrayList<Vector>>): Arena {

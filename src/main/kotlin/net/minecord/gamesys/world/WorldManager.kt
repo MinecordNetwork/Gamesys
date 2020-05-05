@@ -29,7 +29,7 @@ import kotlin.math.atan2
 
 class WorldManager(private val plugin: Gamesys) {
     private val worldName = "world_arenas"
-    private lateinit var bukkitWorld: World
+    lateinit var bukkitWorld: World
     private lateinit var worldEditWorld: com.sk89q.worldedit.world.World
     private val lobbyFile = File("./plugins/${plugin.name}", "Lobby.schem")
     private lateinit var lobbySpawnLocation: Vector
