@@ -5,7 +5,7 @@ import net.minecord.gamesys.game.Game
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.xoreboardutil.bukkit.XoreBoardUtil
 
-open class GameSidebar(open val plugin: Gamesys, val game: Game) {
+open class GameSidebar(open val plugin: Gamesys, open val game: Game) {
     private val board = XoreBoardUtil.getNextXoreBoard()
 
     open fun getTitle(player: GamePlayer): String {
