@@ -279,6 +279,8 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
             onPlayerLeft(players[playersCount])
         }
 
+        sidebar.destroy()
+
         plugin.gameManager.removeGame(this)
     }
 

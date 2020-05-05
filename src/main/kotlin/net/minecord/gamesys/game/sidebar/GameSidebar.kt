@@ -37,4 +37,8 @@ open class GameSidebar(open val plugin: Gamesys, open val game: Game) {
             private.showSidebar()
         }
     }
+
+    open fun destroy() {
+        board.destroy()
+    }
 }
