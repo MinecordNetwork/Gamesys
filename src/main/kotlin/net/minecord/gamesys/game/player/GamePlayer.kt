@@ -60,4 +60,14 @@ open class GamePlayer(open val plugin: Gamesys, val player: Player) {
     open fun getLobbyGameMode(): GameMode {
         return GameMode.ADVENTURE
     }
+
+    open fun isAlive(): Boolean {
+        if (player.isOnline) {
+            if (status == GamePlayerStatus.PLAYING) {
+                return true
+            }
+        }
+
+        return false
+    }
 }
