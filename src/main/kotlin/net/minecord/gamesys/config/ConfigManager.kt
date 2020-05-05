@@ -9,6 +9,7 @@ class ConfigManager(val plugin: Gamesys) {
     val config: YamlConfiguration = YamlConfiguration()
 
     init {
+        loadConfig()
         loadMessageConfig()
     }
 

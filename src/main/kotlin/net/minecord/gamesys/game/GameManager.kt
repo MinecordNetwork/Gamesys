@@ -26,7 +26,9 @@ class GameManager(val plugin: Gamesys) {
 
     fun addGame() {
         plugin.logger.logInfo("Creating new game")
-        games.add(plugin.system.createGame(plugin, plugin.arenaManager.arenas.random()))
+        val game = plugin.system.createGame(plugin, plugin.arenaManager.arenas.random())
+        games.add(game)
+        plugin.worldManager.loadGame(game)
     }
 
     fun removeGame(game: Game) {

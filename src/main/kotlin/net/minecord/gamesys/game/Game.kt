@@ -6,6 +6,9 @@ import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
+import net.minecord.gamesys.game.sidebar.GameSidebar
+import net.minecord.gamesys.system.DefaultSystem
+import net.minecord.gamesys.system.System
 import net.minecord.gamesys.utils.colored
 import net.minecord.gamesys.utils.instantFirework
 import net.minecord.gamesys.utils.runTask
@@ -28,12 +31,8 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
     var invinciblePlayers = true
     protected val locations = hashMapOf<String, MutableList<Location>>()
     protected val bar: CraftBossBar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
-    protected val sidebar = plugin.system.createGameSidebar(plugin, this)
+    protected val sidebar: GameSidebar by lazy { plugin.system.createGameSidebar(plugin, this) }
     lateinit var lobbyLocation: Location
-
-    init {
-        plugin.worldManager.loadGame(this)
-    }
 
     open fun onArenaLoaded(editSession: EditSession, origin: Location, lobbyLocation: Location) {
         for ((string, vectors) in arena.locations) {
