@@ -35,9 +35,9 @@ interface System {
 
     fun getMinimumPreparedGamesCount(): Int
 
-    fun isItemThrowingAllowed(): Boolean
+    fun isArenaProtected(): Boolean
 
-    fun isHungerBarDisabled(): Boolean
+    fun isLobbyProtected(): Boolean
 
-    fun dropItemsAfterDeath(): Boolean
+    fun getProperty(property: SystemProperty): Boolean
 }

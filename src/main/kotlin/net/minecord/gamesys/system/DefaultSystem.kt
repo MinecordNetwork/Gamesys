@@ -13,7 +13,16 @@ import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import java.io.File
 
-open class BaseSystem(val plugin: Gamesys) : System {
+open class DefaultSystem(val plugin: Gamesys) : System {
+    val properties = hashMapOf<SystemProperty, Boolean>()
+
+    init {
+        properties[SystemProperty.STARVING] = false
+        properties[SystemProperty.FALL_DAMAGE] = false
+        properties[SystemProperty.ITEM_THROWING] = false
+        properties[SystemProperty.DROP_ITEMS_AFTER_DEATH] = false
+    }
+
     override fun createArena(name: String, file: File, locations: HashMap<String, ArrayList<Vector>>): Arena {
         return Arena(name, file, locations)
     }
@@ -64,15 +73,15 @@ open class BaseSystem(val plugin: Gamesys) : System {
         return 3
     }
 
-    override fun isItemThrowingAllowed(): Boolean {
+    override fun isArenaProtected(): Boolean {
         return true
     }
 
-    override fun isHungerBarDisabled(): Boolean {
-        return false
+    override fun isLobbyProtected(): Boolean {
+        return true
     }
 
-    override fun dropItemsAfterDeath(): Boolean {
-        return true
+    override fun getProperty(property: SystemProperty): Boolean {
+        return properties[property]!!
     }
 }

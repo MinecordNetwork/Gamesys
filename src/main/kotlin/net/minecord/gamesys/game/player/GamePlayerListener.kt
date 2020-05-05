@@ -2,12 +2,11 @@ package net.minecord.gamesys.game.player
 
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.system.SystemProperty
 import net.minecord.gamesys.utils.ProtocolSupport
 import net.minecord.gamesys.utils.colored
 import net.minecord.gamesys.utils.runTaskLater
-import org.bukkit.Bukkit
 import org.bukkit.attribute.Attribute
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
@@ -18,7 +17,6 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
-import org.bukkit.scheduler.BukkitRunnable
 
 class GamePlayerListener(private val plugin: Gamesys) : Listener {
     @EventHandler
@@ -83,7 +81,7 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
     fun onPlayerDeath(e: PlayerDeathEvent) {
         e.deathMessage = null
 
-        if (!plugin.system.dropItemsAfterDeath()) {
+        if (!plugin.system.getProperty(SystemProperty.DROP_ITEMS_AFTER_DEATH)) {
             e.drops.clear()
         }
 
@@ -125,15 +123,31 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
 
     @EventHandler
     fun onPlayerDropItem(event: PlayerDropItemEvent) {
-        if (!plugin.system.isItemThrowingAllowed()) {
+        if (!plugin.system.getProperty(SystemProperty.ITEM_THROWING)) {
             event.isCancelled = true
         }
     }
 
     @EventHandler
     fun onPlayerHunger(event: FoodLevelChangeEvent) {
-        if (plugin.system.isHungerBarDisabled()) {
+        if (!plugin.system.getProperty(SystemProperty.STARVING)) {
             event.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onFallDmage(e: EntityDamageEvent) {
+        if (!plugin.system.getProperty(SystemProperty.FALL_DAMAGE)) {
+            if (e.entity !is Player) return
+
+            val victim = plugin.gamePlayerManager.get(e.entity as Player)
+            if (victim.game == null) {
+                return
+            }
+
+            if (e.cause == EntityDamageEvent.DamageCause.FALL) {
+                e.isCancelled = true
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package net.minecord.gamesys
 
+import net.minecord.gamesys.arena.ArenaListener
 import net.minecord.gamesys.arena.ArenaManager
 import net.minecord.gamesys.command.JoinCommand
 import net.minecord.gamesys.command.LeaveCommand
@@ -11,7 +12,7 @@ import net.minecord.gamesys.game.player.GamePlayerListener
 import net.minecord.gamesys.game.player.GamePlayerManager
 import net.minecord.gamesys.game.portal.GamePortalManager
 import net.minecord.gamesys.logging.Logger
-import net.minecord.gamesys.system.BaseSystem
+import net.minecord.gamesys.system.DefaultSystem
 import net.minecord.gamesys.system.System
 import net.minecord.gamesys.world.WorldManager
 import org.bukkit.Bukkit
@@ -26,7 +27,7 @@ open class Gamesys: JavaPlugin() {
     val logger: Logger by lazy { Logger(this) }
     val configReader: ConfigReader by lazy { ConfigReader(this) }
     val configManager: ConfigManager by lazy { ConfigManager(this) }
-    open val system: System by lazy { BaseSystem(this) }
+    open val system: System by lazy { DefaultSystem(this) }
 
     override fun onEnable() {
         gamePlayerManager.enable()
@@ -39,6 +40,7 @@ open class Gamesys: JavaPlugin() {
         getCommand("start")!!.setExecutor(StartCommand(this))
 
         Bukkit.getPluginManager().registerEvents(GamePlayerListener(this), this)
+        Bukkit.getPluginManager().registerEvents(ArenaListener(this), this)
     }
 
     override fun onDisable() {
