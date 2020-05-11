@@ -4,7 +4,7 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
-import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.chat.colored
 import net.minecord.gamesys.utils.instantFirework
 import net.minecord.gamesys.utils.runTask
 import org.bukkit.*

@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 import java.util.*
 
 open class GamePlayerManager(private val plugin: Gamesys) {
-    private val players = hashMapOf<UUID, GamePlayer>()
+    val players = hashMapOf<UUID, GamePlayer>()
 
     fun enable() {
         loadPlayers()

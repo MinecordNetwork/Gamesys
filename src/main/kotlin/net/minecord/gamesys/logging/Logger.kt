@@ -1,7 +1,7 @@
 package net.minecord.gamesys.logging
 
 import net.minecord.gamesys.Gamesys
-import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.chat.colored
 import org.bukkit.Bukkit
 
 class Logger(val plugin: Gamesys) {

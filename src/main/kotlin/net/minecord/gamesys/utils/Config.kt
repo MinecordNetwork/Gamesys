@@ -1,6 +1,7 @@
 package net.minecord.gamesys.utils
 
 import net.minecord.gamesys.Gamesys
+import net.minecord.gamesys.utils.chat.colored
 
 fun Gamesys.getMsgString(message: String): String {
     return this.configManager.messages.getString(message)!!.colored()

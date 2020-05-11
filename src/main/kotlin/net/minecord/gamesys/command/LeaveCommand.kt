@@ -1,7 +1,7 @@
 package net.minecord.gamesys.command
 
 import net.minecord.gamesys.Gamesys
-import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.chat.colored
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender

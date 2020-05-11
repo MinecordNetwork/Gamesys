@@ -4,7 +4,7 @@ import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
 import net.minecord.gamesys.system.SystemProperty
 import net.minecord.gamesys.utils.ProtocolSupport
-import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.chat.colored
 import net.minecord.gamesys.utils.runTaskLater
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
@@ -167,5 +167,13 @@ class GamePlayerListener(private val plugin: Gamesys) : Listener {
         if (e.cause == PlayerTeleportEvent.TeleportCause.SPECTATE) {
             e.isCancelled = true
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onChat(e: AsyncPlayerChatEvent) {
+        val player = plugin.gamePlayerManager.get(e.player)
+
+        if (player.onChat(e.message))
+            e.isCancelled = true
     }
 }

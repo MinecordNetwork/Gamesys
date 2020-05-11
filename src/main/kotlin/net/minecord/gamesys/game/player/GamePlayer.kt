@@ -70,4 +70,8 @@ open class GamePlayer(open val plugin: Gamesys, val player: Player) {
 
         return false
     }
+
+    open fun onChat(message: String): Boolean {
+        return false
+    }
 }

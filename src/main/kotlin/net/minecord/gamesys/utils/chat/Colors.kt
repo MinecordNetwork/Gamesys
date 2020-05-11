@@ -1,4 +1,4 @@
-package net.minecord.gamesys.utils
+package net.minecord.gamesys.utils.chat
 
 import org.bukkit.ChatColor
 

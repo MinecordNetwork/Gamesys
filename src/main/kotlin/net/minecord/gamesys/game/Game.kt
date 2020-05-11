@@ -7,9 +7,7 @@ import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
 import net.minecord.gamesys.game.sidebar.GameSidebar
-import net.minecord.gamesys.system.DefaultSystem
-import net.minecord.gamesys.system.System
-import net.minecord.gamesys.utils.colored
+import net.minecord.gamesys.utils.chat.colored
 import net.minecord.gamesys.utils.instantFirework
 import net.minecord.gamesys.utils.runTask
 import net.minecord.gamesys.utils.runTaskLaterAsynchronously
@@ -74,7 +72,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
         plugin.gamePortalManager.update()
         sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &ajoined &7the game &f(${players.size}/${getMaximumPlayers()})")
         if (status == GameStatus.WAITING) {
-            sendMessage("${plugin.system.getChatPrefix()} &7The game needs &f${getMinimumPlayers() - players.size} &7more players to start")
+            sendMessage("${plugin.system.getChatPrefix()} &7The game needs &f${getMinimumPlayersToStartCountdown() - players.size} &7more players to start")
         }
     }
 
