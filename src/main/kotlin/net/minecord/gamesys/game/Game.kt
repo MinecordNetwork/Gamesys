@@ -28,7 +28,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
     var startCountdownCounter = 0
     var invinciblePlayers = true
     protected val locations = hashMapOf<String, MutableList<Location>>()
-    protected val bar: CraftBossBar = CraftBossBar("&f&lWaiting for more players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12)
+    protected val bar: CraftBossBar by lazy { CraftBossBar("&f&lWaiting for &e&l${getMinimumPlayersToStartCountdown()} &f&lmore players".colored(), BarColor.WHITE, BarStyle.SEGMENTED_12) }
     protected val sidebar: GameSidebar by lazy { plugin.system.createGameSidebar(plugin, this) }
     lateinit var lobbyLocation: Location
 
@@ -73,6 +73,8 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
         sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &ajoined &7the game &f(${players.size}/${getMaximumPlayers()})")
         if (status == GameStatus.WAITING) {
             sendMessage("${plugin.system.getChatPrefix()} &7The game needs &f${getMinimumPlayersToStartCountdown() - players.size} &7more players to start")
+            bar.setTitle("&f&lWaiting for &e&l${getMinimumPlayersToStartCountdown() - players.size} &f&lmore players".colored())
+            bar.progress = players.size.toDouble() / getMinimumPlayersToStartCountdown().toDouble()
         }
     }
 
@@ -93,6 +95,10 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
         plugin.gamePortalManager.update()
         if (status != GameStatus.ENDING && status != GameStatus.ENDED) {
             sendMessage("${plugin.system.getChatPrefix()} &7Player &e${player.player.name} &7has &cleft &7the game &f(${players.size}/${getMaximumPlayers()})")
+        }
+        if (status == GameStatus.WAITING) {
+            bar.setTitle("&f&lWaiting for &e&l${getMinimumPlayersToStartCountdown() - players.size} &f&lmore players".colored())
+            bar.progress = players.size.toDouble() / getMinimumPlayersToStartCountdown().toDouble()
         }
     }
 
@@ -162,7 +168,8 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
 
     open fun onStartWaiting() {
         status = GameStatus.WAITING
-        bar.setTitle("&f&lWaiting for more players".colored())
+        bar.setTitle("&f&lWaiting for &e&l${getMinimumPlayersToStartCountdown() - players.size} &f&lmore players".colored())
+        bar.progress = players.size.toDouble() / getMinimumPlayersToStartCountdown().toDouble()
         plugin.gamePortalManager.update()
     }
 
