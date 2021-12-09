@@ -15,7 +15,7 @@ import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
-import org.bukkit.craftbukkit.v1_15_R1.boss.CraftBossBar
+import org.bukkit.craftbukkit.v1_16_R3.boss.CraftBossBar
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.scheduler.BukkitRunnable

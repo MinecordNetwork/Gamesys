@@ -1,8 +1,8 @@
 package net.minecord.gamesys.world
 
-import com.boydti.fawe.FaweAPI
-import com.boydti.fawe.util.EditSessionBuilder
-import com.boydti.fawe.util.TaskManager
+import com.fastasyncworldedit.core.FaweAPI
+import com.fastasyncworldedit.core.util.EditSessionBuilder
+import com.fastasyncworldedit.core.util.TaskManager
 import com.onarandombox.MultiverseCore.MultiverseCore
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
 import com.onarandombox.MultiverseCore.utils.FileUtils
