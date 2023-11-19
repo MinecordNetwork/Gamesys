@@ -1,12 +1,12 @@
 package net.minecord.gamesys.world
 
 import com.fastasyncworldedit.core.FaweAPI
-import com.fastasyncworldedit.core.util.EditSessionBuilder
 import com.fastasyncworldedit.core.util.TaskManager
 import com.onarandombox.MultiverseCore.MultiverseCore
 import com.onarandombox.MultiverseCore.api.MultiverseWorld
 import com.onarandombox.MultiverseCore.utils.FileUtils
 import com.sk89q.worldedit.EditSession
+import com.sk89q.worldedit.EditSessionBuilder
 import com.sk89q.worldedit.bukkit.BukkitWorld
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
 import com.sk89q.worldedit.function.operation.Operation
@@ -117,12 +117,11 @@ class WorldManager(private val plugin: Gamesys) {
         val lobbyOrigin = BlockVector3.at(0, pasteHeight, lastZ + border)
         lastZ = lobbyOrigin.blockZ
 
-        TaskManager.IMP.async {
+        TaskManager.taskManager().async {
             try {
                 plugin.logger.logInfo("Pasting lobby for arena ${game.arena.name}")
 
                 var now = System.currentTimeMillis()
-                val editSessionLobby = pasteSchematic(lobbyFile, lobbyOrigin)
 
                 val lobbySpawn = lobbyOrigin.add(lobbySpawnLocation.blockX, lobbySpawnLocation.blockY, lobbySpawnLocation.blockZ)
                 val lobbyLocation = Location(bukkitWorld, lobbySpawn.x.toDouble(), lobbySpawn.y.toDouble(), lobbySpawn.z.toDouble())
@@ -132,25 +131,23 @@ class WorldManager(private val plugin: Gamesys) {
                 ) * (180.0 / Math.PI)).toFloat()
                 lobbyLocation.pitch = 0f
 
-                editSessionLobby.setBlock(BlockVector3.at(lobbySpawn.blockX, lobbySpawn.blockY, lobbySpawn.blockZ), BlockTypes.AIR?.defaultState)
-                editSessionLobby.close()
+                worldEditWorld.setBlock(lobbySpawn.blockX, lobbySpawn.blockY, lobbySpawn.blockZ, BlockTypes.AIR?.defaultState)
 
                 plugin.logger.logInfo("Lobby for arena ${game.arena.name} pasted at ${lobbyOrigin.blockX} ${lobbyOrigin.blockY} ${lobbyOrigin.blockZ} (${(System.currentTimeMillis() - now)}ms)")
                 plugin.logger.logInfo("Pasting arena ${game.arena.name}")
 
                 now = System.currentTimeMillis()
-                val editSession = pasteSchematic(game.arena.file, arenaOrigin)
+                pasteSchematic(game.arena.file, arenaOrigin)
 
                 game.onArenaLoaded(
-                    editSession,
+                    worldEditWorld,
                     Location(bukkitWorld, arenaOrigin.x.toDouble(), arenaOrigin.y.toDouble(), arenaOrigin.z.toDouble()),
                     lobbyLocation
                 )
 
                 game.getSpawnLocations().forEach {
-                    editSession.setBlock(BlockVector3.at(it.blockX, it.blockY, it.blockZ), BlockTypes.AIR?.defaultState)
+                    worldEditWorld.setBlock(it.blockX, it.blockY, it.blockZ, BlockTypes.AIR?.defaultState)
                 }
-                editSession.close()
 
                 object : BukkitRunnable() {
                     override fun run() {
@@ -166,19 +163,16 @@ class WorldManager(private val plugin: Gamesys) {
         }
     }
 
-    private fun pasteSchematic(file: File, location: BlockVector3): EditSession {
+    private fun pasteSchematic(file: File, location: BlockVector3) {
         val clipboard = ClipboardFormats.findByFile(file)?.getReader(file.inputStream())?.read()
         val clipboardHolder = ClipboardHolder(clipboard)
-        val editSession = EditSessionBuilder(BukkitWorld(bukkitWorld)).fastmode(true).build()
         val operation: Operation = clipboardHolder
-            .createPaste(editSession)
+            .createPaste(worldEditWorld)
             .to(location)
             .ignoreAirBlocks(true)
             .build()
 
         Operations.complete(operation)
-
-        return editSession
     }
 
     fun fixRespawnScreen() {

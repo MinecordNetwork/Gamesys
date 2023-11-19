@@ -15,7 +15,7 @@ import org.bukkit.*
 import org.bukkit.attribute.Attribute
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
-import org.bukkit.craftbukkit.v1_16_R3.boss.CraftBossBar
+import org.bukkit.craftbukkit.v1_20_R2.boss.CraftBossBar
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.scheduler.BukkitRunnable
@@ -32,7 +32,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
     protected val sidebar: GameSidebar by lazy { plugin.system.createGameSidebar(plugin, this) }
     lateinit var lobbyLocation: Location
 
-    open fun onArenaLoaded(editSession: EditSession, origin: Location, lobbyLocation: Location) {
+    open fun onArenaLoaded(worldEditWorld: com.sk89q.worldedit.world.World, origin: Location, lobbyLocation: Location) {
         for ((string, vectors) in arena.locations) {
             locations[string] = arrayListOf()
             vectors.forEach {
