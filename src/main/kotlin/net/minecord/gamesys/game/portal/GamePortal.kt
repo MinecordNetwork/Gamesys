@@ -4,8 +4,8 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.game.GameStatus
+import net.minecord.gamesys.utils.InstantFirework
 import net.minecord.gamesys.utils.chat.colored
-import net.minecord.gamesys.utils.instantFirework
 import net.minecord.gamesys.utils.runTask
 import org.bukkit.*
 import org.bukkit.block.Block
@@ -32,7 +32,7 @@ open class GamePortal(val plugin: Gamesys, val location: Location) {
                                 player.velocity = Vector(randomDir * 12 * 0.05, 12 * 0.1, randomDir * 12 * 0.05)
                                 player.sendTitle("", "&c&lNo games available".colored(), 5, 40, 10)
                             } else {
-                                instantFirework(FireworkEffect.builder().withColor(Color.WHITE).with(FireworkEffect.Type.BURST).build(), player.location)
+                                InstantFirework().explode(FireworkEffect.builder().withColor(Color.WHITE).with(FireworkEffect.Type.BURST).build(), player.location)
                                 game.onPlayerJoined(plugin.gamePlayerManager.get(player))
                             }
                         }

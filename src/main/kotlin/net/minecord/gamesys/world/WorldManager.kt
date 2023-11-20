@@ -122,6 +122,7 @@ class WorldManager(private val plugin: Gamesys) {
                 plugin.logger.logInfo("Pasting lobby for arena ${game.arena.name}")
 
                 var now = System.currentTimeMillis()
+                pasteSchematic(lobbyFile, lobbyOrigin)
 
                 val lobbySpawn = lobbyOrigin.add(lobbySpawnLocation.blockX, lobbySpawnLocation.blockY, lobbySpawnLocation.blockZ)
                 val lobbyLocation = Location(bukkitWorld, lobbySpawn.x.toDouble(), lobbySpawn.y.toDouble(), lobbySpawn.z.toDouble())
@@ -202,7 +203,7 @@ class WorldManager(private val plugin: Gamesys) {
             mV.mvWorldManager.loadWorld(worldName)
 
         } else {
-            val ret: Boolean = mV.mvWorldManager.addWorld(worldName, World.Environment.NORMAL, null, WorldType.NORMAL, false, "VoidGenerator", false)
+            val ret: Boolean = mV.mvWorldManager.addWorld(worldName, World.Environment.NORMAL, null, WorldType.NORMAL, false, "VoidGen", false)
 
             if (ret) {
                 val mvWorld: MultiverseWorld = mV.mvWorldManager.getMVWorld(worldName)

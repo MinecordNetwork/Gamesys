@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib", "1.8.21")
     implementation("fr.mrmicky", "fastboard", "2.0.1")
+    compileOnly("org.jetbrains.kotlin", "kotlin-stdlib", "1.8.21")
     compileOnly("io.papermc.paper", "paper-api", "1.20.2-R0.1-SNAPSHOT")
     compileOnly("com.sk89q.worldedit", "worldedit-core", "7.3.0-SNAPSHOT")
     compileOnly("com.sk89q.worldedit", "worldedit-bukkit", "7.3.0-SNAPSHOT")

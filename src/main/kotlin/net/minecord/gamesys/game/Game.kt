@@ -1,14 +1,13 @@
 package net.minecord.gamesys.game
 
-import com.sk89q.worldedit.EditSession
 import net.minecord.gamesys.Gamesys
 import net.minecord.gamesys.arena.Arena
 import net.minecord.gamesys.game.player.GamePlayer
 import net.minecord.gamesys.game.player.GamePlayerStatus
 import net.minecord.gamesys.game.player.event.DeathMessageSentEvent
 import net.minecord.gamesys.game.sidebar.GameSidebar
+import net.minecord.gamesys.utils.InstantFirework
 import net.minecord.gamesys.utils.chat.colored
-import net.minecord.gamesys.utils.instantFirework
 import net.minecord.gamesys.utils.runTask
 import net.minecord.gamesys.utils.runTaskLaterAsynchronously
 import org.bukkit.*
@@ -248,7 +247,7 @@ open class Game(open val plugin: Gamesys, open val arena: Arena) {
                         return
                     }
                     else -> {
-                        instantFirework(FireworkEffect.builder().withColor(Color.fromRGB(
+                        InstantFirework().explode(FireworkEffect.builder().withColor(Color.fromRGB(
                             Random.nextInt(0, 255),
                             Random.nextInt(0, 255),
                             Random.nextInt(0, 255)
