@@ -219,7 +219,7 @@ class WorldManager(private val plugin: Gamesys) {
                 val worldCreator = WorldCreator(worldName)
                 worldCreator.environment(World.Environment.NORMAL)
                 worldCreator.generateStructures(false)
-                worldCreator.generator("VoidGenerator")
+                worldCreator.generator("VoidGen")
                 world = worldCreator.createWorld()
                 if (world != null) {
                     world.difficulty = Difficulty.NORMAL
